@@ -28,8 +28,8 @@ export default {
 <style>
 #app {
   font-family: Arial, sans-serif;
-  color: #d9d9d9;
-  background-color: #151515;
+  color: var(--text2);
+  background-color: var(--body-bcg);
   margin: 0;
   padding: 0;
   width: 100%;
@@ -45,11 +45,11 @@ export default {
 
 .main {
   flex: 1;
-  background: var(--gray-800);
+  background: var(--body-bcg);
 }
 
 .footer {
-  background: #212121;
+  background: var(--footer-bgc);
   padding: 10px 20px;
   text-align: center;
   color: #d9d9d9;

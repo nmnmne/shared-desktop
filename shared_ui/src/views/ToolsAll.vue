@@ -1,40 +1,39 @@
 <template>
-    <div class="tools-page">
-      <SidebarAll :toolsData="toolsData" @change-tool="handleChangeTool" />
-      <div class="tools">
-        <div v-if="!currentTool">Выберите инструмент</div>
-        <div v-else>
-          <ApiDir v-if="currentTool.toolName === 'ApiDir'" />
-          <!-- <Tool2 v-if="currentTool.toolName === 'tool2'" /> -->
-        </div>
-
+  <div class="tools-page">
+    <SidebarAll :toolsData="toolsData" @change-tool="handleChangeTool" />
+    <div class="tools">
+      <div v-if="!currentTool">Выберите инструмент</div>
+      <div v-else>
+        <ApiDir v-if="currentTool.toolName === 'ApiDir'" />
+        <!-- <Tool2 v-if="currentTool.toolName === 'tool2'" /> -->
       </div>
+
     </div>
-  </template>
-  
-  <script setup>
-  import SidebarAll from "@/components/SidebarAll.vue";
-  import {onMounted, ref} from "vue";
-  import ApiDir from "@/tools/ApiDir.vue";
+  </div>
+</template>
 
-  const currentTool = ref(null);
+<script setup>
+import SidebarAll from "@/components/SidebarAll.vue";
+import {onMounted, ref} from "vue";
+import ApiDir from "@/tools/ApiDir.vue";
 
-  const handleChangeTool = (tool) => {
-    currentTool.value = tool;
-  }
+const currentTool = ref(null);
 
-  </script>
-  
-  <style scoped>
-  .tools {
-    padding: 20px;
-    flex-grow: 1;
-  }
+const handleChangeTool = (tool) => {
+  currentTool.value = tool;
+}
 
-  .tools-page {
-    display: flex;
-    height: 100%;
-  }
+</script>
 
-  </style>
-  
+<style scoped>
+.tools {
+  padding: 20px;
+  flex-grow: 1;
+}
+
+.tools-page {
+  display: flex;
+  height: 100%;
+}
+
+</style>

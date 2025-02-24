@@ -4,6 +4,9 @@
       <img src="@/assets/img/logo.png" width="22" height="22" alt="Logo" />
       <span>Рабочий стол транспортного инженера</span>
     </div>
+    <div class="theme">
+      <label for="">Тёмная тема <input type="checkbox" class="theme-checkbox"></label>
+    </div>
     <nav>
       <ul class="nav-list nav-list_right">
         <li v-for="item in menu" :key="item.id">
@@ -60,7 +63,7 @@ const menu = ref([
   white-space: nowrap; /* Запрещаем перенос на новую строку для всех элементов */
 }
 .header {
-  background: var(--gray-960);
+  background: var(--header-bcg);
   padding: 4px 15px;
   display: flex;
   align-items: center;
@@ -80,6 +83,20 @@ const menu = ref([
   margin-top: 2px;
 }
 
+.theme label {
+  color: var(--text3);
+  margin-top: 2px;
+}
+
+.theme {
+  border-radius: 3px;
+  padding: 1px 7px;
+  display: flex;
+  align-items: center;
+  background-color: var(--theme);
+  color: var(--text2);
+}
+
 .nav-list {
   list-style: none;
   display: flex;
@@ -93,8 +110,8 @@ const menu = ref([
   }
 
   a {
+    color: var(--text1);
     text-decoration: none;
-    color: #d9d9d9;
     padding: 0px 1px;
     border-radius: 3px;
     transition: background-color 0.2s ease;
@@ -106,12 +123,11 @@ const menu = ref([
   }
 
   li:hover a {
-    background-color: var(--blue1);
-    color: rgb(232, 232, 232);
+    background-color: var(--hover-hdr);
   }
 
   a.active {
-    background-color: var(--gray-700);
+    background-color: var(--active-hdr);
   }
 
   li a::after {
@@ -121,7 +137,7 @@ const menu = ref([
   bottom: -4px;
   width: 0;
   height: 3px;
-  background-color: var(--gray-400);
+  background-color: var(--line-hdr);
   border-radius: 1px;
   transition: width 0.3s ease, left 0.3s ease;
 }
@@ -132,9 +148,17 @@ const menu = ref([
   }
 }
 
-@media (max-width: 700px) {
+@media (max-width: 850px) {
   .brand span {
-    display: none; /* Скрываем блок .brand на экранах менее 400px */
+    display: none;
+  }
+  .theme {
+    margin-right: auto;
+  }
+}
+@media (max-width: 550px) {
+  .brand label {
+    display: none;
   }
 }
 </style>

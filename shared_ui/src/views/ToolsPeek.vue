@@ -16,6 +16,7 @@ import SidebarPeek from "@/components/SidebarPeek.vue";
 import {onMounted, ref} from "vue";
 import PeekProcesses from "@/tools/PeekProcesses.vue";
 
+const toolsData = ref(null);
 const currentTool = ref(null);
 
 const handleChangeTool = (tool) => {

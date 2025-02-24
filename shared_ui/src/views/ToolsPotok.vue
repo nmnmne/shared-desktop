@@ -18,6 +18,7 @@ import {onMounted, ref} from "vue";
 import RestartWebAdmin from "@/tools/RestartWebAdmin.vue";
 import DtPotok from "@/tools/DtPotok.vue";
 
+const toolsData = ref(null);
 const currentTool = ref(null);
 
 const handleChangeTool = (tool) => {
