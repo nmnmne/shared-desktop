@@ -26,6 +26,7 @@ const handleChangeTool = (tool) => {
 </script>
 
 <style scoped>
+
 .tools {
   padding: 20px;
   flex-grow: 1;

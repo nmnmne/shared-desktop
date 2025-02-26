@@ -32,7 +32,7 @@ const sidebarNav = ref([
   {
     id: 3,
     title: "Работа с конфигуратором",
-    toolName: "",
+    toolName: "PotokTLC",
   },
 ]);
 

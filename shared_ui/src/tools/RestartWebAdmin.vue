@@ -1,18 +1,19 @@
 <template>
-  <div>
-    <h2>Перезагрузка web интерфейса ДК Поток</h2>
+  <div class="container">
+    <h2 class="title">Перезагрузка web интерфейса</h2>
 
-    <form @submit.prevent="handleSubmit" class="form-inline">
-        <input
-          type="text"
-          v-model="ipAddress"
-          class="form-control"
-          placeholder="IP адрес"
-          required
-          autocomplete="off"
-        />
-        <button type="submit">Перезагрузка</button>
-    </form>
+    <div class="form-inline">
+      <input
+        type="text"
+        v-model="ipAddress"
+        class="text"
+        placeholder="000.000.000.000"
+        required
+        autocomplete="off"
+        style="width: 20ch;"
+      />
+      <button @click="handleSubmit">Перезагрузка</button>
+    </div>
 
     <p :style="{ color: responseMessage.color }">{{ responseMessage.text }}</p>
   </div>
@@ -77,11 +78,6 @@ export default {
 };
 </script>
 
-
 <style scoped>
-  input[type="text"]{
-    padding: 3px;
-    border-radius: 6px;
-  
-  }
+
 </style>

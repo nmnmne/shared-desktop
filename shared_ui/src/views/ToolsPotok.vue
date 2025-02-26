@@ -6,6 +6,7 @@
       <div v-else>
         <RestartWebAdmin v-if="currentTool.toolName === 'RestartWebAdmin'" />
         <DtPotok v-if="currentTool.toolName === 'DtPotok'" />
+        <PotokTLC v-if="currentTool.toolName === 'PotokTLC'" />
       </div>
 
     </div>
@@ -17,6 +18,7 @@ import SidebarPotok from "@/components/SidebarPotok.vue";
 import {onMounted, ref} from "vue";
 import RestartWebAdmin from "@/tools/RestartWebAdmin.vue";
 import DtPotok from "@/tools/DtPotok.vue";
+import PotokTLC from "@/tools/PotokTLC.vue";
 
 const toolsData = ref(null);
 const currentTool = ref(null);
@@ -28,6 +30,7 @@ const handleChangeTool = (tool) => {
 </script>
 
 <style scoped>
+
 .tools {
   padding: 20px;
   flex-grow: 1;

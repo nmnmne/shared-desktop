@@ -1,27 +1,27 @@
 <template>
-  <div>
-    <h2>Генерация строки для программирования ДК Поток</h2>
-
-    <!-- Форма для ввода -->
-    <div>
+  <div class="container">
+    <h2 class="title">Генерация условий вызова или продления</h2>
+    <div class="form-inline">
       <input 
         type="text" 
         v-model="detRangesAndGroup" 
-        placeholder="Пример: 1-4, 7-12, 3" 
-        class="form-control" 
+        placeholder="1-4, 7-7, 3" 
+        class="text"
+        style="width:28ch;"
       />
       <button @click="generateCondition" class="btn btn-primary mt-2">
         Сгенерировать
       </button>
     </div>
 
-    <!-- Поле для вывода результата -->
     <div v-if="response">
       <h4>Результат:</h4>
-      <textarea class="form-control" rows="4" readonly>{{ response }}</textarea>
+      <textarea class="minitext" rows="12">{{ response }}</textarea>
+      <button v-if="response" @click="copyToClipboard" class="btn btn-copy mt-2">
+        Скопировать
+      </button>
     </div>
 
-    <!-- Поле для вывода ошибки -->
     <div v-if="error" class="alert alert-danger mt-3">
       <strong>Ошибка:</strong> {{ error }}
     </div>
@@ -67,14 +67,16 @@ export default {
 
       this.error = "Ошибка при подключении к серверам.";
     },
+
+    copyToClipboard() {
+      const textarea = this.$el.querySelector('.minitext');
+      textarea.select();
+      document.execCommand('copy');
+    },
   },
 };
 </script>
 
 <style scoped>
-  input[type="text"]{
-    padding: 7px;
-    border-radius: 6px;
-  
-  }
+
 </style>

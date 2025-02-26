@@ -27,7 +27,8 @@ export default {
 
 <style>
 #app {
-  font-family: Arial, sans-serif;
+  font-family: 'Roboto', sans-serif;
+  font-size: 17px;
   color: var(--text2);
   background-color: var(--body-bcg);
   margin: 0;
@@ -52,7 +53,7 @@ export default {
   background: var(--footer-bgc);
   padding: 10px 20px;
   text-align: center;
-  color: #d9d9d9;
+  color: var(--text2);
 }
 
 .footer p {
