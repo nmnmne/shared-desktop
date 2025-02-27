@@ -17,6 +17,7 @@ import SidebarAll from "@/components/SidebarAll.vue";
 import {onMounted, ref} from "vue";
 import ApiDir from "@/tools/ApiDir.vue";
 
+const toolsData = ref(null);
 const currentTool = ref(null);
 
 const handleChangeTool = (tool) => {

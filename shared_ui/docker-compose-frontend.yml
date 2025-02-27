@@ -1,0 +1,9 @@
+version: '3.8'
+services:
+  shared-ui:
+    image: inteonmteca/shared_ui
+    ports:
+      - "9000:80"
+    container_name: shared-ui
+    env_file:
+      - .env
