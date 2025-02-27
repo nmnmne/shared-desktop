@@ -1,6 +1,11 @@
 # shared_desktop_frontend
 
-This template should help get you started developing with Vue 3 in Vite.
+docker build -t inteonmteca/shared_ui .
+docker push inteonmteca/shared_ui
+
+docker-compose -f docker-compose-frontend.yml down
+docker pull inteonmteca/shared_ui:latest
+docker-compose -f docker-compose-frontend.yml up -d
 
 ## Recommended IDE Setup
 

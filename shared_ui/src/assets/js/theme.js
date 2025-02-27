@@ -1,35 +1,36 @@
-const checkbox = document.querySelector('.theme-checkbox');
-const toggle = document.getElementById('theme-toggle');
+import { ref } from "vue";
 
+// Состояние для темы
+export const isDarkTheme = ref(false);
 
-document.addEventListener('DOMContentLoaded', () => {
+// Загружаем тему из localStorage при монтировании компонента
+export function loadTheme() {
   const savedTheme = localStorage.getItem('theme');
+
   if (savedTheme === 'true') {
-    checkbox.checked = true;
-    theme.setAttribute('href', './src/assets/css/dark.css');
-    console.log("DarkTheme");
+    isDarkTheme.value = true;
+    document.body.classList.add('dark-theme');
   } else {
-    checkbox.checked = false;
-    theme.setAttribute('href', './src/assets/css/light.css');
-    console.log("LightTheme");
+    isDarkTheme.value = false;
+    document.body.classList.remove('dark-theme');
   }
-  toggle.classList.toggle('active', checkbox.checked);
-});
+}
 
-toggle.addEventListener('click', function() {
-  checkbox.checked = !checkbox.checked;
-  toggle.classList.toggle('active', checkbox.checked);
-  handleThemeChange();
-});
+// Переключение темы
+export function toggleTheme() {
+  isDarkTheme.value = !isDarkTheme.value;
 
-checkbox.addEventListener('change', handleThemeChange);
+  // Небольшая задержка для анимации
+  setTimeout(() => {
+    const toggleSwitch = document.querySelector('.toggle-switch');
+    toggleSwitch.classList.toggle('active', isDarkTheme.value);
+  }, 50); // Даем время на отрисовку
 
-function handleThemeChange() {
-  if (checkbox.checked) {
-    localStorage.setItem('theme', true);
-    theme.setAttribute('href', './src/assets/css/dark.css');
+  if (isDarkTheme.value) {
+    localStorage.setItem('theme', 'true');
+    document.body.classList.add('dark-theme');
   } else {
-    localStorage.setItem('theme', false);
-    theme.setAttribute('href', './src/assets/css/light.css');
+    localStorage.setItem('theme', 'false');
+    document.body.classList.remove('dark-theme');
   }
 }
