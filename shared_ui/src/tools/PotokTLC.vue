@@ -16,16 +16,20 @@
           Создать
         </button>
       </div>
-      <label>{{ conditionResult }}</label>
       <div v-if="functions.length > 0" class="functions-container">
         <div v-for="func in functions" :key="func" class="function-item">
           <input type="checkbox" :id="func" />
           <label :for="func">{{ func }}</label>
         </div>
       </div>
-      <button @click="getConditionResult">
+      <div class="form-inline">
+      <button v-if="functions.length > 0" @click="getConditionResult">
         Тестировать сочетание
       </button>
+      <label :class="{'green-text': conditionResult === 'TRUE', 'red-text': conditionResult === 'FALSE'}" class="result-label">
+        {{ conditionResult }}
+      </label>
+      </div>
     </div>
   </div>
 </template>
@@ -106,7 +110,7 @@ export default {
             }
           );
 
-          this.conditionResult = `Результат условия с заданными значениями: ${response.data.result
+          this.conditionResult = `${response.data.result
             .toString()
             .toUpperCase()}`;
           return;
@@ -156,4 +160,16 @@ export default {
   margin: 20px 0px 20px;
 }
 
+.result-label {
+  margin: 0 10px;
+  font-size: 27px;
+}
+
+.green-text {
+  color: green;
+}
+
+.red-text {
+  color: red;
+}
 </style>

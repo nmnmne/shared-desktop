@@ -25,7 +25,6 @@
     <pre class="hidden">{{ transformedProcesses }}</pre>
     <button @click="sendData">Рассчитать</button>
 
-    <!-- Модальное окно с ответом -->
     <div v-if="showModal" class="modal">
       <div class="modal-content">
         <span class="close" @click="showModal = false">&times;</span>

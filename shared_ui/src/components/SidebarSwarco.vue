@@ -27,7 +27,7 @@ const sidebarNav = ref([
   {
     id: 2,
     title: "Рсшифровка логов",
-    toolName: "",
+    toolName: "SwarcoLog",
   },
   {
     id: 3,

@@ -9,7 +9,7 @@ import { serverIPs } from '@/assets/js/config';
 import axios from 'axios';
 
 export default {
-  name: "",
+  name: "SwarcoLog",
   data() {
     return {
       condition: "",
@@ -21,38 +21,28 @@ export default {
     };
   },
   methods: {
-    async createFunctions() {
+    async sendData() {
       for (let ip of this.serverIPs) {
-        const server = `http://${ip}${this.apiPath}`;
+        let server = `http://${ip}${this.apiPath}`;
 
         try {
-          const response = await axios.post(
-            server,
-            {
-              options: {
-                get_functions_from_condition_string: true,
-                get_condition_result: false,
-              },
-              condition: this.condition,
-              payload: {},
-            },
-            {
-              headers: {
-                "X-CSRFToken": this.getCookie("csrftoken"),
-                Authorization: `Token ${this.token}`,
-              },
-            }
-          );
-
-          this.functions = response.data.functions;
+          const response = await axios.post(server, this.transformedProcesses);
+          this.responseData = response.data.repaired_cmd_sg;
+          this.responseIsError = false;
+          this.showModal = true;
           return;
         } catch (error) {
           console.warn(`Ошибка подключения к ${server}:`, error);
         }
       }
 
-      console.error("Ошибка при подключении ко всем серверам.");
-    },}}
+      // Если ни один сервер не ответил
+      this.responseMessage = "Ошибка при отправке данных ко всем серверам.";
+      this.responseIsError = true;
+      this.showModal = true;
+    }
+  }
+};
 </script>
 
 <style scoped>
