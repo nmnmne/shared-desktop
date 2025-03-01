@@ -13,10 +13,10 @@
           style="width: 20ch;"
         />
       </div>
-      <div>
+      <div class="form-inline">
         <button @click="executeCommand('ps')">Просмотреть</button>
         <button hidden @click="executeCommand('top')">Выполнить TOP</button>
-        <button @click="executeCommand('kill')">Завершить</button>
+        <button class="red-button" @click="executeCommand('kill')">Завершить</button>
       </div>
     </div>
 

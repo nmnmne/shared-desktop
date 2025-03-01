@@ -5,6 +5,7 @@
       <div v-if="!currentTool">Выберите инструмент</div>
       <div v-else>
         <SwarcoITC v-if="currentTool.toolName === 'SwarcoITC'" />
+        <SwarcoLog v-if="currentTool.toolName === 'SwarcoLog'" />
       </div>
 
     </div>
@@ -14,6 +15,7 @@
 <script setup>
 import SidebarSwarco from "@/components/SidebarSwarco.vue";
 import SwarcoITC from "@/tools/SwarcoITC.vue";
+import SwarcoLog from "@/tools/SwarcoLog.vue";
 import {onMounted, ref} from "vue";
 // import Tool1 from "@/tools/Tool1.vue";
 
