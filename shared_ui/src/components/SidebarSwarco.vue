@@ -22,7 +22,7 @@ const sidebarNav = ref([
   {
     id: 1,
     title: "Сброс сессий пользователя 'itc'",
-    toolName: "",
+    toolName: "SwarcoITC",
   },
   {
     id: 2,
