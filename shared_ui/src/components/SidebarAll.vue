@@ -27,7 +27,7 @@ const sidebarNav = ref([
   {
     id: 2,
     title: "Управление контроллером",
-    toolName: "",
+    toolName: "ManageControllers",
   },
   {
     id: 3,

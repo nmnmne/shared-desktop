@@ -9,7 +9,7 @@ import { serverIPs } from '@/assets/js/config';
 import axios from 'axios';
 
 export default {
-  name: "SwarcoLog",
+  name: "",
   data() {
     return {
       condition: "",
