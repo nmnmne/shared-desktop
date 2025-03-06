@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <h2 style="margin-bottom: 20px">Расчет процессов Peek</h2>
+  <div class="container">
+    <h2 class="title">Расчет процессов Peek</h2>
     <label for="processCount">Выберите количество процессов: </label>
     <select v-model="selectedProcessCount" id="processCount">
       <option v-for="n in 4" :key="n" :value="n">{{ n }}</option>
@@ -9,6 +9,7 @@
       <div v-for="i in selectedProcessCount" :key="i" class="tool-form">
         <input 
           type="text" 
+          class="minitext"
           :name="'title' + i" 
           :placeholder="'Процесс ' + i" 
           v-model="processes[i - 1].title"
@@ -16,6 +17,7 @@
         >
         <textarea 
           :name="'value' + i" 
+          class="minitext"
           rows="6" 
           v-model="processes[i - 1].value"
           autocomplete="off"
@@ -30,8 +32,8 @@
         <span class="close" @click="showModal = false">&times;</span>
         <div v-for="i in selectedProcessCount" :key="i" class="modal-output">
           <label>{{ 'Процесс ' + i }}</label>
-          <input type="text" :value="responseData[i]?.[0] || ''" readonly>
-          <textarea rows="4" :value="responseData[i]?.[1].join('\n') || ''" readonly></textarea>
+          <input class="minitext" type="text" :value="responseData[i]?.[0] || ''" readonly>
+          <textarea class="minitext" rows="4" :value="responseData[i]?.[1].join('\n') || ''" readonly></textarea>
         </div>
       </div>
     </div>

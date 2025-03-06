@@ -26,8 +26,8 @@ const sidebarNav = ref([
   },
   {
     id: 2,
-    title: "Управление контроллером",
-    toolName: "ManageControllers",
+    title: "Управление фазой",
+    toolName: "PhaseControl",
   },
   {
     id: 3,
