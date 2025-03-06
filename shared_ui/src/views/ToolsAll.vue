@@ -5,7 +5,7 @@
       <div v-if="!currentTool">Выберите инструмент</div>
       <div v-else>
         <ApiDir v-if="currentTool.toolName === 'ApiDir'" />
-        <!-- <Tool2 v-if="currentTool.toolName === 'tool2'" /> -->
+        <PhaseControl v-if="currentTool.toolName === 'PhaseControl'" />
       </div>
 
     </div>
@@ -16,6 +16,7 @@
 import SidebarAll from "@/components/SidebarAll.vue";
 import {onMounted, ref} from "vue";
 import ApiDir from "@/tools/ApiDir.vue";
+import PhaseControl from "@/tools/PhaseControl.vue"
 
 const toolsData = ref(null);
 const currentTool = ref(null);

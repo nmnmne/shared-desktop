@@ -4,18 +4,6 @@
       <img src="@/assets/img/logo.png" width="22" height="22" alt="Logo" />
       <span>Рабочий стол транспортного инженера</span>
     </div>
-    <div class="theme">
-      <input
-        type="checkbox"
-        class="theme-checkbox"
-        hidden
-        v-model="isDarkTheme"
-        @change="toggleTheme"
-      />
-      <div class="toggle-switch" id="theme-toggle" :class="{ active: isDarkTheme }" @click="toggleTheme">
-        <div class="slider"></div>
-      </div>
-    </div>
     <nav>
       <ul class="nav-list nav-list_right">
         <li v-for="item in menu" :key="item.id">
@@ -32,8 +20,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import { loadTheme, toggleTheme, isDarkTheme } from "@/assets/js/theme.js"; // Импортируем функции и состояние
+import { ref } from "vue";
 
 // Массив меню
 const menu = ref([
@@ -44,10 +31,6 @@ const menu = ref([
   { id: 5, title: "Общее", path: "/tools_all" },
 ]);
 
-// Загружаем тему при монтировании компонента
-onMounted(() => {
-  loadTheme(); // Загружаем тему из localStorage
-});
 </script>
 
 <style lang="scss" scoped>

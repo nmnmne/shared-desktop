@@ -10,6 +10,7 @@ from . import (
     views, openpyxl, crcpeek, swarco_log,
     get_firmware, swarco_ssh
 )
+from .swarco_log import SwarcoLogView
 from .toolkit.views import (
     ControllerManagementAPI,
     DownloadConfig,
@@ -70,6 +71,7 @@ urlpatterns = [
     path('openpyxl/', openpyxl.openpyxl, name='openpyxl'),
     path('crcpeek/', crcpeek.crcpeek, name='crcpeek'),
     path('swarco_log/', swarco_log.swarco_log, name='swarco_log'),
+    path('swarco_log_api/', SwarcoLogView.as_view(), name='api_swarco_log'),
     path('get_firmware/', get_firmware.get_firmware, name='get_firmware'),
     path('get_firmware_api/', get_firmware.get_firmware_api, name='get_firmware_api'),
 

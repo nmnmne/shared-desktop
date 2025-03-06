@@ -1,5 +1,8 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill
 import re
@@ -265,3 +268,21 @@ def swarco_log(request):
         return response
     
     return render(request, 'tools/swarco_log.html')
+
+
+class SwarcoLogView(APIView):
+    parser_classes = [MultiPartParser]
+
+    def post(self, request, *args, **kwargs):
+        if 'logfile' in request.FILES:
+            file = request.FILES['logfile']
+            wb = process_file(file)
+            
+            response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            response['Content-Disposition'] = 'attachment; filename="processed_data.xlsx"'
+            wb.save(response)
+            return response
+        return Response({"error": "No file uploaded"}, status=400)
+
+    def get(self, request, *args, **kwargs):
+        return render(request, 'tools/swarco_log.html')

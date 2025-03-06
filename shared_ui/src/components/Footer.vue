@@ -1,24 +1,35 @@
-<script setup>
-
-</script>
-
 <template>
-  <footer class="footer">
-    <p class="footer-text">СпецДорПроект 2025</p>
+  <footer>
+    <div class="footer-container">
+      <div class="theme">
+        <label>Тёмная тема</label>
+        <input
+          type="checkbox"
+          class="theme-checkbox"
+          hidden
+          v-model="isDarkTheme"
+          @change="toggleTheme"
+        />
+        <div class="toggle-switch" id="theme-toggle" :class="{ active: isDarkTheme }" @click="toggleTheme">
+          <div class="slider"></div>
+        </div>
+      </div>
+      <a href="http://192.168.45.90/" class="old-site-link">Старый сайт</a>
+    </div>
   </footer>
-</template>
+  </template>
+  
+  <script setup>
+  import { onMounted } from "vue";
+  import { loadTheme, toggleTheme, isDarkTheme } from "@/assets/js/theme.js";
+  
+  // Загружаем тему при монтировании компонента
+  onMounted(() => {
+    loadTheme(); // Загружаем тему из localStorage
+  });
+  </script>
+  
+  <style lang="scss" scoped>
+  @use "@/assets/css/Footer.scss" as *;
 
-<style scoped>
-.footer {
-  background: var(--gray-900);
-  padding: 0px;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-}
-
-.footer-text {
-  font-size: 8px;
-  margin: 0;
-}
-</style>
+  </style>
