@@ -23,7 +23,7 @@
           <form id="main-form" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="form-group row mb-2">
-              <div class="col-11 d-flex align-items-center">
+              <div class="col-9 d-flex align-items-center">
                 <select class="form-control" id="parameter_set" name="parameter_set" onchange="triggerUpload()">
                   <option value="" disabled {% if not selected_set %}selected{% endif %}>Выберите сохраненые настройки</option>
                   {% for parameter_set in parameter_sets %}
@@ -34,7 +34,14 @@
                   {% endfor %}
                 </select>
               </div>
-              <div class="col-3 d-flex align-items-center">
+              <div class="col-2 d-flex align-items-center">
+                <select class="form-control" id="interval" name="interval">
+                  <option value="10">10 минут</option>
+                  <option value="15">15 минут</option>
+                  <option value="20">20 минут</option>
+                  <option value="30">30 минут</option>
+                  <option value="60" selected>60 минут</option>
+              </select>
                 <button type="submit" id="upload_button" name="upload_button" class="btn btn-primary" style="width: 125px; display: none;">Загрузить</button>
               </div>
               

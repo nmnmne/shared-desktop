@@ -6,23 +6,11 @@
         type="text"
         class="text"
         id="search_host"
-        placeholder="Номер СО"
-        style="width: 11ch;"
+        placeholder="НомерСО"
+        style="width: 9ch;"
         v-model="searchValue"
         @input="searchHost"
       />
-
-      <div class="form-group" v-if="showScn" style="display: none;">
-        <input
-          type="text"
-          id="scn"
-          class="minitext"
-          v-model="scn"
-          placeholder="SCN"
-          style="width: 10ch;"
-          readonly
-        />
-      </div>
 
       <select
         id="timeout"
@@ -47,23 +35,23 @@
 
       <button
         class="btn btn-primary"
-        :disabled="!isFormValid || isButtonDisabled"
+        :disabled="!isFormValid"
         @click="setPhase"
       >
-        {{ buttonText }}
+        Включить
       </button>
-
-      <div v-if="responseData" class="response-block">
+      
+      <div v-if="responseData" class="form-inline">
         <pre class="text_">{{ responseData.countdown }}</pre>
+        <pre class="text_" style="color: yellowgreen;">{{ countdownTimer }} сек</pre>
       </div>
 
     </div>
     <div style="margin-top: 30px;">
       <span @click="toggleVisibility" style="cursor: pointer; user-select: none; margin: 7px;">
-        {{ isVisible ? 'Скрыть ^' : 'Показать >' }}
+        {{ isVisible ? 'Скрыть ^' : 'Если не получается по номеру СО >' }}
       </span>
 
-      <!-- Контейнер с элементами -->
       <div :class="{ hidden: !isVisible }">
         <input
           type="text"
@@ -79,7 +67,6 @@
           class="text"
           style="width: 10ch;"
           v-model="protocol"
-          @change="updateScnVisibility"
         >
           <option value="">Тип ДК</option>
           <option v-for="type in typesControllers" :key="type" :value="type">{{ type }}</option>
@@ -97,17 +84,17 @@ export default {
   name: "PhaseControl",
   data() {
     return {
+      countdownTimer: 0,
+      countdownIntervalId: null,
       isVisible: false,
       searchValue: "",
       ip: "",
       protocol: "",
-      scn: "",
-      showScn: false,
       typesControllers: ["Swarco", "Поток (S)", "Поток (P)", "Peek"],
       token: import.meta.env.VITE_API_TOKEN,
       responseData: null,
       intervalId: null,
-      selectedTimeout: 30,
+      selectedTimeout: 60,
       timeouts: [10, 20, 30, 40, 60, 80, 100, 120, 140, 160, 180],
       selectedPhase: 0,
       phases: [0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 
@@ -115,19 +102,11 @@ export default {
       31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45,
       46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60,
       61, 62, 63, 64, 65],
-      isButtonDisabled: false,
-      countdown: 0,
-      countdownInterval: null,
     };
   },
   computed: {
-
     isFormValid() {
       return this.ip && this.protocol;
-    },
-
-    buttonText() {
-      return this.isButtonDisabled ? `${this.countdown} сек` : "Включить";
     },
   },
   methods: {
@@ -150,8 +129,6 @@ export default {
 
         this.ip = response.data.ip_adress || "";
         this.protocol = response.data.type_controller || "";
-
-        this.updateScnVisibility();
       } catch (error) {
         console.error("Ошибка при поиске по номеру СО:", error);
         if (error.response) {
@@ -162,31 +139,6 @@ export default {
     },
     toggleVisibility() {
       this.isVisible = !this.isVisible;
-    },
-    updateScnVisibility() {
-      this.showScn = this.protocol === "Поток (P)" || this.protocol === "Peek";
-
-      if (this.showScn) {
-        this.updateScn();
-      } else {
-        this.scn = "";
-      }
-    },
-    updateScn() {
-      const searchValue = this.searchValue.trim();
-      if (!searchValue) {
-        this.scn = "";
-        return;
-      }
-
-      if (this.protocol === "Peek") {
-        this.scn = `CO${searchValue}`;
-      } else if (this.protocol === "Поток (P)") {
-        const paddedNumber = searchValue.slice(-4).padStart(4, "0");
-        this.scn = `CO${paddedNumber}`;
-      } else {
-        this.scn = "";
-      }
     },
 
     async fetchData() {
@@ -218,6 +170,10 @@ export default {
           },
         });
 
+        if (this.responseData?.countdown !== response.data.countdown) {
+          this.startCountdown();
+        }
+
         this.responseData = response.data;
       } catch (error) {
         console.error("Ошибка при запросе данных:", error);
@@ -226,9 +182,7 @@ export default {
     },
 
     async setPhase() {
-      if (!this.isFormValid || this.isButtonDisabled) return;
-
-      this.startCountdown();
+      if (!this.isFormValid) return;
 
       const serverIP = serverIPs[0];
       const protocolMap = {
@@ -256,20 +210,6 @@ export default {
 
     },
 
-    startCountdown() {
-      this.isButtonDisabled = true;
-      this.countdown = this.selectedTimeout;
-
-      this.countdownInterval = setInterval(() => {
-        if (this.countdown > 0) {
-          this.countdown--;
-        } else {
-          clearInterval(this.countdownInterval);
-          this.isButtonDisabled = false;
-        }
-      }, 1000);
-    },
-
     startPolling() {
       this.stopPolling();
       this.intervalId = setInterval(() => {
@@ -283,20 +223,26 @@ export default {
         this.intervalId = null;
       }
     },
+    startCountdown() {
+      this.stopCountdown();
+      this.countdownTimer = 0;
+      this.countdownIntervalId = setInterval(() => {
+        this.countdownTimer += 1;
+      }, 1000);
+    },
+    stopCountdown() {
+      if (this.countdownIntervalId) {
+        clearInterval(this.countdownIntervalId);
+        this.countdownIntervalId = null;
+      }
+    },
   },
   watch: {
-    protocol() {
-      this.updateScnVisibility();
-      this.isButtonDisabled = false;
-      clearInterval(this.countdownInterval);
-    },
     searchValue() {
       this.updateScn();
     },
     ip() {
       this.startPolling();
-      this.isButtonDisabled = false;
-      clearInterval(this.countdownInterval);
     },
     protocol() {
       this.startPolling();
@@ -306,14 +252,11 @@ export default {
     },
     selectedPhase() {
       this.fetchData();
-      this.isButtonDisabled = false;
-      clearInterval(this.countdownInterval);
     },
   },
 
   beforeUnmount() {
     this.stopPolling();
-    clearInterval(this.countdownInterval);
   },
 };
 </script>
