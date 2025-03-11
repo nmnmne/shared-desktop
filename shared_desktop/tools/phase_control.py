@@ -66,14 +66,13 @@ async def get_phase(request):
             countdown_str = "Invalid IP Address"
         else:
 
-            def snmp_get_request(ip, community, oid):
+            async def snmp_get_request(ip, community, oid):
                 (
                     error_indication,
                     error_status,
                     error_index,
                     var_binds,
-                ) = next(
-                    getCmd(
+                ) = await getCmd(
                         SnmpEngine(),
                         CommunityData(community),
                         UdpTransportTarget((ip, 161)),
@@ -81,7 +80,6 @@ async def get_phase(request):
                         ObjectType(ObjectIdentity(oid)),
                         lexicographicMode=True,
                     )
-                )
 
                 if error_indication:
                     countdown_str= f"Ошибка: {error_indication}"
@@ -101,8 +99,7 @@ async def get_phase(request):
                     error_status,
                     error_index,
                     var_binds,
-                ) = next(
-                    nextCmd(
+                ) = await nextCmd(
                         SnmpEngine(),
                         CommunityData(community),
                         UdpTransportTarget((ip, 161)),
@@ -110,7 +107,6 @@ async def get_phase(request):
                         ObjectType(ObjectIdentity(oid)),
                         lexicographicMode=True,
                     )
-                )
 
                 if error_indication:
                     countdown_str = error_indication
@@ -122,21 +118,14 @@ async def get_phase(request):
                     )
                     return JsonResponse({'countdown': countdown_str})
 
-                for name, val in var_binds:
-                    oid_str = name.prettyPrint()
-                    scn = oid_str[-16:]
-                    if scn[2] != ".":
-                        scn = oid_str[-19:]
-                        if scn[2] == ".":
-                            ...
-                        else:
-                            scn = oid_str[-22:]
-                            if scn[2] != ".":
-                                print("SCN error:", scn)
-                                return 0
+                oid_str = var_binds[0][0][0]
 
-                    # print("SCN:", scn)
-                    return scn
+                for i in range(7, 3, -1):
+                    scn = oid_str[-i:]
+                    if len(scn) > 1 and str(scn[1]) == "67":
+                        scn = f".1.{scn}"
+                        # print("SCN:", scn)
+                        return scn
 
         community_string = "UTMC"
         oid_get_request = ".1.3.6.1.4.1.13267.3.2.4.2.1.15"
@@ -371,7 +360,7 @@ async def get_phase(request):
     return JsonResponse({'countdown': countdown_str})
 
 
-async def stcip(ip_address, phase_value, timeout):
+async def stcip(ip_address, phase_value, timeout, community_string):
     """Несколько раз повторяю команду STCIP"""
     global current_requests
 
@@ -386,40 +375,37 @@ async def stcip(ip_address, phase_value, timeout):
     if phase_value == 0:
         timeout = 3
 
-    try:
-        ipaddress.IPv4Address(ip_address)
-    except ipaddress.AddressValueError:
-        error_message = "Invalid IP Address"
-    else:
-        for _ in range(timeout):
-            print('timeout ', timeout)
-            print(f"Таймер: {_} для IP {ip_address} фаза {phase_value-1}")
 
-            # Прерываем цикл, если phase_value изменился
-            if current_requests[ip_address] != phase_value:
-                print(f"/////// Отправляем новую фазу на {ip_address} и прерываем отправку предыдущей")
-                break
+    for _ in range(timeout):
+        print('timeout ', timeout)
+        print(f"Таймер: {_} для IP {ip_address} фаза {phase_value-1}")
 
-            oid = ObjectIdentity("1.3.6.1.4.1.1618.3.7.2.11.1.0")
-            # error_indication, error_status, error_index, var_binds =  await setCmd(
-            #     SnmpEngine(),
-            #     CommunityData("private", mpModel=0),
-            #     UdpTransportTarget((ip_address, 161)),
-            #     ContextData(),
-            #     ObjectType(oid, Unsigned32(phase_value)),
-            # )
-            # await asyncio.sleep(1)
-            print('dfdfd')
+        # Прерываем цикл, если phase_value изменился
+        if current_requests[ip_address] != phase_value:
+            print(f"/////// Отправляем новую фазу на {ip_address} и прерываем отправку предыдущей")
+            break
+
+        oid = ObjectIdentity("1.3.6.1.4.1.1618.3.7.2.11.1.0")
+
+        error_indication, error_status, error_index, var_binds =  await setCmd(
+            SnmpEngine(),
+            CommunityData(community_string, mpModel=0),
+            UdpTransportTarget((ip_address, 161)),
+            ContextData(),
+            ObjectType(oid, Unsigned32(phase_value)),
+        )
+        await asyncio.sleep(1)
+        
 
     if current_requests[ip_address] == phase_value and phase_value != 0:
-        asyncio.ensure_future(stcip(ip_address, 0, 3))
+        await stcip(ip_address, 0, 3, "private")
 
     # if error_indication:
     #     error_message = f"Ошибка: {error_indication}"
     # else:
     #     error_message = None
 
-    return error_message
+    return None
 
 
 async def snmp_set_request_out(ip, timeout, community, oid, data_type_set, msg, stage_set, protocol):
@@ -538,7 +524,6 @@ async def set_phase(request):
     print(f'Timeout: {timeout}')
         
     community_string = "private"
-
 
 
     if protocol == "UG405":
@@ -724,15 +709,15 @@ async def set_phase(request):
             data_type_set = Integer(value_set)
             msg = "UTC"
             asyncio.ensure_future(snmp_set_request_out(
-                ip_address,
-                timeout,
-                community_string,
-                oid_to_set_request,
-                data_type_set,
-                msg,
-                stage_set,
-                protocol,
-            ))
+                    ip_address,
+                    timeout,
+                    community_string,
+                    oid_to_set_request,
+                    data_type_set,
+                    msg,
+                    stage_set,
+                    protocol,
+                ))
 
             oid_to_set_request = (
                 f".1.3.6.1.4.1.13267.3.2.4.2.1.15{old_str}"
@@ -804,260 +789,236 @@ async def set_phase(request):
                         protocol,
                     )
 
-
     if protocol == "STCIP":
+        community_string = "private"
+        phase_value = Integer(phase_value)
         print(
             "Команда STCIP",
             ip_address,
             phase_value,
             protocol,
+            community_string,
+
         )
-        asyncio.ensure_future(stcip(ip_address, phase_value, timeout))
+        await stcip(ip_address, phase_value, timeout, community_string)
 
-    # if protocol == "UTMC":
+    if protocol == "UTMC":
 
-    #     phase = phase_value - 1
-    #     # print("Включить UTMC", ip_address, phase, protocol)
-    #     audit_logger.info(
-    #         f"{request.user.username} / {ip_address}, phase: {phase}, {protocol}"
-    #     )
-    #     try:
-    #         ipaddress.IPv4Address(ip_address)
-    #     except ipaddress.AddressValueError:
-    #         error_message = "Invalid IP Address"
-    #     else:
+        phase = phase_value - 1
 
-    #         def snmp_get_request(ip, community, oid):
-    #             (
-    #                 error_indication,
-    #                 error_status,
-    #                 error_index,
-    #                 var_binds,
-    #             ) = next(
-    #                 getCmd(
-    #                     SnmpEngine(),
-    #                     CommunityData(community),
-    #                     UdpTransportTarget((ip, 161)),
-    #                     ContextData(),
-    #                     ObjectType(ObjectIdentity(oid)),
-    #                     lexicographicMode=True,
-    #                 )
-    #             )
+        try:
+            ipaddress.IPv4Address(ip_address)
+        except ipaddress.AddressValueError:
+            error_message = "Invalid IP Address"
+        else:
 
-    #             if error_indication:
-    #                 print(f"Ошибка: {error_indication}")
-    #                 return None
+            async def snmp_get_request(ip, community, oid):
+                (
+                    error_indication,
+                    error_status,
+                    error_index,
+                    var_binds,
+                ) = await getCmd(
+                        SnmpEngine(),
+                        CommunityData(community),
+                        UdpTransportTarget((ip, 161)),
+                        ContextData(),
+                        ObjectType(ObjectIdentity(oid)),
+                        lexicographicMode=True,
+                    )
 
-    #             if error_status:
-    #                 print(
-    #                     f"Ошибка: {error_status.prettyPrint()} на {error_index and var_binds[int(error_index) - 1][0] or '?'}"
-    #                 )
-    #                 return None
+                if error_indication:
+                    print(f"Ошибка: {error_indication}")
+                    return None
 
-    #             for name, val in var_binds:
-    #                 oid_val = val.prettyPrint()
-    #                 return oid_val
+                if error_status:
+                    print(
+                        f"Ошибка: {error_status.prettyPrint()} на {error_index and var_binds[int(error_index) - 1][0] or '?'}"
+                    )
+                    return None
 
-    #         def snmp_get_next_request(ip, community, oid):
-    #             (
-    #                 error_indication,
-    #                 error_status,
-    #                 error_index,
-    #                 var_binds,
-    #             ) = next(
-    #                 nextCmd(
-    #                     SnmpEngine(),
-    #                     CommunityData(community),
-    #                     UdpTransportTarget((ip, 161)),
-    #                     ContextData(),
-    #                     ObjectType(ObjectIdentity(oid)),
-    #                     lexicographicMode=True,
-    #                 )
-    #             )
+                for name, val in var_binds:
+                    oid_val = val.prettyPrint()
+                    return oid_val
 
-    #             if error_indication:
-    #                 print(f"Ошибка: {error_indication}")
-    #                 return None
-    #             if error_status:
-    #                 print(
-    #                     f"Ошибка: {error_status.prettyPrint()} на "
-    #                     f"{error_index and var_binds[int(error_index) - 1][0] or '?'}"
-    #                 )
-    #                 return None
+            async def snmp_get_next_request(ip, community, oid):
+                (
+                    error_indication,
+                    error_status,
+                    error_index,
+                    var_binds,
+                ) = await nextCmd(
+                        SnmpEngine(),
+                        CommunityData(community),
+                        UdpTransportTarget((ip, 161)),
+                        ContextData(),
+                        ObjectType(ObjectIdentity(oid)),
+                        lexicographicMode=True,
+                    )
 
-    #             for name, val in var_binds:
-    #                 oid_str = name.prettyPrint()
-    #                 scn = oid_str[-16:]
-    #                 if scn[2] != ".":
-    #                     scn = oid_str[-19:]
-    #                     if scn[2] == ".":
-    #                         ...
-    #                     else:
-    #                         scn = oid_str[-22:]
-    #                         if scn[2] != ".":
-    #                             print("SCN error:", scn)
-    #                             return 0
+                if error_indication:
+                    print(f"Ошибка: {error_indication}")
+                    return None
+                if error_status:
+                    print(
+                        f"Ошибка: {error_status.prettyPrint()} на "
+                        f"{error_index and var_binds[int(error_index) - 1][0] or '?'}"
+                    )
+                    return None
 
-    #                 return scn
+                oid_str = var_binds[0][0][0]
 
-    #         community_string = "UTMC"
-    #         oid_get_request = ".1.3.6.1.4.1.13267.3.2.4.2.1.15"
-    #         oid_operation_mode = ".1.3.6.1.4.1.13267.3.2.4.1.0"
-    #         old_str = await snmp_get_next_request(
-    #             ip_address,
-    #             community_string,
-    #             oid_get_request,
-    #         )
-    #         operation_mode = await snmp_get_request(
-    #             ip_address,
-    #             community_string,
-    #             oid_operation_mode,
-    #         )
+                for i in range(7, 3, -1):
+                    scn = oid_str[-i:]
+                    if len(scn) > 1 and str(scn[1]) == "67":
+                        scn = f".1.{scn}"
+                        # print("SCN:", scn)
+                        return scn
 
-    #         # print(
-    #         #     "Operation mode: ",
-    #         #     operation_mode,
-    #         # )
+            community_string = "UTMC"
+            oid_get_request = ".1.3.6.1.4.1.13267.3.2.4.2.1.15"
+            oid_operation_mode = ".1.3.6.1.4.1.13267.3.2.4.1.0"
+            old_str = await snmp_get_next_request(
+                ip_address,
+                community_string,
+                oid_get_request,
+            )
+            operation_mode = await snmp_get_request(
+                ip_address,
+                community_string,
+                oid_operation_mode,
+            )
 
-    #         try:
-    #             if int(operation_mode) != 3:
-    #                 oid_to_set_request = ".1.3.6.1.4.1.13267.3.2.4.1.0"
-    #                 value_set = 2
-    #                 data_type_set = Integer(value_set)
-    #                 msg = "Monitor"
-    #                 threading.Thread(
-    #                     target=snmp_set_request_one,
-    #                     args=(
-    #                         ip_address,
-    #                         community_string,
-    #                         oid_to_set_request,
-    #                         data_type_set,
-    #                         msg,
-    #                     ),
-    #                 ).start()
+            # print(
+            #     "Operation mode: ",
+            #     operation_mode,
+            # )
 
-    #         except Exception as e:
-    #             print(f"Произошло исключение: {type(e).__name__}: {e}")
+            try:
+                if int(operation_mode) != 3:
+                    oid_to_set_request = ".1.3.6.1.4.1.13267.3.2.4.1.0"
+                    value_set = 2
+                    data_type_set = Integer(value_set)
+                    msg = "Monitor"
+                    
+                    # Асинхронный вызов
+                    await snmp_set_request_one(
+                        ip_address,
+                        community_string,
+                        oid_to_set_request,
+                        data_type_set,
+                        msg
+                    )
+            except Exception as e:
+                print(f"Ошибка: {e}")
 
-    #         if old_str is not None:
+            if old_str is not None:
 
-    #             stage_dict = {
-    #                 1: "00000000",
-    #                 2: "01000000",
-    #                 3: "02000000",
-    #                 4: "04000000",
-    #                 5: "08000000",
-    #                 6: "10000000",
-    #                 7: "20000000",
-    #                 8: "40000000",
-    #                 9: "80000000",
-    #                 10: "00010000",
-    #                 11: "00020000",
-    #                 12: "00040000",
-    #                 13: "00080000",
-    #                 14: "00100000",
-    #                 15: "00200000",
-    #                 16: "00400000",
-    #                 17: "00800000",
-    #                 18: "00000100",
-    #                 19: "00000200",
-    #                 20: "00000400",
-    #                 21: "00000800",
-    #                 22: "00001000",
-    #                 23: "00002000",
-    #                 24: "00004000",
-    #                 25: "00008000",
-    #                 26: "00000001",
-    #                 27: "00000002",
-    #                 28: "00000004",
-    #                 29: "00000008",
-    #                 30: "00000010",
-    #                 31: "00000020",
-    #                 32: "00000040",
-    #                 33: "00000080",
-    #             }
-    #             if 1 <= phase_value <= 33:
-    #                 stage_set = stage_dict.get(phase_value, "00000000")
-    #             else:
-    #                 stage_set = "00000000"
+                stage_dict = {
+                    1: "00000000",
+                    2: "01000000",
+                    3: "02000000",
+                    4: "04000000",
+                    5: "08000000",
+                    6: "10000000",
+                    7: "20000000",
+                    8: "40000000",
+                    9: "80000000",
+                    10: "00010000",
+                    11: "00020000",
+                    12: "00040000",
+                    13: "00080000",
+                    14: "00100000",
+                    15: "00200000",
+                    16: "00400000",
+                    17: "00800000",
+                    18: "00000100",
+                    19: "00000200",
+                    20: "00000400",
+                    21: "00000800",
+                    22: "00001000",
+                    23: "00002000",
+                    24: "00004000",
+                    25: "00008000",
+                    26: "00000001",
+                    27: "00000002",
+                    28: "00000004",
+                    29: "00000008",
+                    30: "00000010",
+                    31: "00000020",
+                    32: "00000040",
+                    33: "00000080",
+                }
+                if 1 <= phase_value <= 33:
+                    stage_set = stage_dict.get(phase_value, "00000000")
+                else:
+                    stage_set = "00000000"
 
-    #             oid_to_set_request = ".1.3.6.1.4.1.13267.3.2.4.1.0"
-    #             value_set = 3
-    #             data_type_set = Integer(value_set)
-    #             msg = f"{ip_address} UTC"
-    #             threading.Thread(
-    #                 target=snmp_set_request_out,
-    #                 args=(
-    #                     ip_address,
-    #                     timeout,
-    #                     community_string,
-    #                     oid_to_set_request,
-    #                     data_type_set,
-    #                     msg,
-    #                     stage_set,
-    #                     protocol,
-    #                 ),
-    #             ).start()
+                oid_to_set_request = ".1.3.6.1.4.1.13267.3.2.4.1.0"
+                value_set = 3
+                data_type_set = Integer(value_set)
+                msg = f"{ip_address} UTC"
+                asyncio.ensure_future(snmp_set_request_out(
+                        ip_address,
+                        timeout,
+                        community_string,
+                        oid_to_set_request,
+                        data_type_set,
+                        msg,
+                        stage_set,
+                        protocol,
+                    ))
 
-    #             oid_to_set_request = (
-    #                 f".1.3.6.1.4.1.13267.3.2.4.2.1.15{old_str}"
-    #             )
-    #             value_set = 1
-    #             if phase_value == 0:
-    #                 value_set = 0
-    #             data_type_set = Integer(value_set)
-    #             msg = f"{ip_address} TO: {oid_to_set_request}"
-    #             threading.Thread(
-    #                 target=snmp_set_request_out,
-    #                 args=(
-    #                     ip_address,
-    #                     timeout,
-    #                     community_string,
-    #                     oid_to_set_request,
-    #                     data_type_set,
-    #                     msg,
-    #                     stage_set,
-    #                     protocol,
-    #                 ),
-    #             ).start()
+                oid_to_set_request = (
+                    f".1.3.6.1.4.1.13267.3.2.4.2.1.15{old_str}"
+                )
+                value_set = 1
+                if phase_value == 0:
+                    value_set = 0
+                data_type_set = Integer(value_set)
+                msg = f"{ip_address} TO: {oid_to_set_request}"
+                asyncio.ensure_future(snmp_set_request_out(
+                        ip_address,
+                        timeout,
+                        community_string,
+                        oid_to_set_request,
+                        data_type_set,
+                        msg,
+                        stage_set,
+                        protocol,
+                    ))
 
-    #             oid_fn_set_request = (
-    #                 f".1.3.6.1.4.1.13267.3.2.4.2.1.4{old_str}"
-    #             )
-    #             print("phase: ", phase, "stage: ", stage_set, "timeout: ", timeout)
-    #             data_type_set = OctetString(hexValue=stage_set)
-    #             msg = f"{ip_address} Fn: {oid_fn_set_request}"
-    #             threading.Thread(
-    #                 target=snmp_set_request_out,
-    #                 args=(
-    #                     ip_address,
-    #                     timeout,
-    #                     community_string,
-    #                     oid_fn_set_request,
-    #                     data_type_set,
-    #                     msg,
-    #                     stage_set,
-    #                     protocol,
-    #                 ),
-    #             ).start()
+                oid_fn_set_request = (
+                    f".1.3.6.1.4.1.13267.3.2.4.2.1.4{old_str}"
+                )
+                print("phase: ", phase, "stage: ", stage_set, "timeout: ", timeout)
+                data_type_set = OctetString(hexValue=stage_set)
+                msg = f"{ip_address} Fn: {oid_fn_set_request}"
+                asyncio.ensure_future(snmp_set_request_out(
+                        ip_address,
+                        timeout,
+                        community_string,
+                        oid_to_set_request,
+                        data_type_set,
+                        msg,
+                        stage_set,
+                        protocol,
+                    ))
 
-    #             oid_dn_set_request = (
-    #                 f".1.3.6.1.4.1.13267.3.2.4.2.1.5{old_str}"
-    #             )
-    #             msg = f"{ip_address} Dn: {oid_dn_set_request}"
-    #             threading.Thread(
-    #                 target=snmp_set_request_out,
-    #                 args=(
-    #                     ip_address,
-    #                     timeout,
-    #                     community_string,
-    #                     oid_dn_set_request,
-    #                     data_type_set,
-    #                     msg,
-    #                     stage_set,
-    #                     protocol,
-    #                 ),
-    #             ).start()
+                oid_dn_set_request = (
+                    f".1.3.6.1.4.1.13267.3.2.4.2.1.5{old_str}"
+                )
+                msg = f"{ip_address} Dn: {oid_dn_set_request}"
+                await snmp_set_request_out(
+                        ip_address,
+                        timeout,
+                        community_string,
+                        oid_dn_set_request,
+                        data_type_set,
+                        msg,
+                        stage_set,
+                        protocol,
+                    )
 
     response_data = {
         'status': 'success',

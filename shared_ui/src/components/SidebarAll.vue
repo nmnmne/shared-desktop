@@ -42,7 +42,7 @@ const sidebarNav = ref([
   {
     id: 5,
     title: "Длительность работы направлений",
-    toolName: "",
+    toolName: "SGCount",
   },
   {
     id: 6,

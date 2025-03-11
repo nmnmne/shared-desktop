@@ -1,7 +1,6 @@
 <template>
   <div class="container">
     <h2 class="title">Работа с Traffic Light Configurator</h2>
-    <div id="main_div">
       <div class="form-inline">
         <input
           v-model="condition"
@@ -10,7 +9,6 @@
           maxlength="2000"
           placeholder="Условие продления/перехода"
           autocomplete="off"
-          style="font-size: 14px; padding: 6px; font-family: Arial;"
         />
         <button @click="createFunctions">
           Создать
@@ -30,7 +28,7 @@
         {{ conditionResult }}
       </label>
       </div>
-    </div>
+
   </div>
 </template>
 

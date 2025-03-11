@@ -1,0 +1,20 @@
+{
+    "10.125.9.66": {
+        "start_time": 1741677955,
+        "request_errors": null,
+        "host_id": 1,
+        "protocol": null,
+        "valid_data_request": null,
+        "type_controller": "Поток (P)",
+        "address": null,
+        "type": null,
+        "request_execution_time": null,
+        "request_entity": [
+            "get_state"
+        ],
+        "responce_entity": {
+            "raw_data": null
+        }
+    }
+}
+

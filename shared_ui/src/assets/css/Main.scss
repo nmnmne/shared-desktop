@@ -9,6 +9,7 @@ body.dark-theme {
   --active-hdr: #424242;
   --active-sbr: #5d738b;
   --line-hdr: #b4b4b4;
+  --info: #2c2d33;
 
   --text1: #ececec;
   --text2: #b1b1b1;
@@ -62,6 +63,7 @@ body {
   --active-hdr: #546992;
   --active-sbr: #68839d;
   --line-hdr: #b4b4b4;
+  --info: #ebebeb;
 
   --text1: #ececec;
   --text2: #30435dd7;
@@ -104,7 +106,6 @@ body {
   --modal-sdw: rgba(210, 206, 171, 0.429);
 }
 
-
 * {
   margin: 0;
   padding: 0;
@@ -135,12 +136,21 @@ body {
   flex-wrap: nowrap;
   align-items: flex-start;
 }
+
+.centr {
+  display: inline-block;
+  align-items: center;
+  line-height: 26px;
+  height: 1px;
+}
+
 .form-column {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 0.2rem; 
 }
+
 .title {
   background-color: var(--text-bcg-1);
   border-radius: 6px;
@@ -202,7 +212,7 @@ button {
 }
 
 .custom-file-input::file-selector-button {
-  padding: 0.375rem 0.75rem;
+  padding: 0.44rem 0.75rem;
   margin: -0.375rem -0.75rem;
   margin-right: 0.75rem;
   font-size: 1rem;
@@ -331,12 +341,7 @@ button {
   }
 }
 
-.width-12-chars {
-  width: 12ch;
-  font-family: monospace;
-}
-
-.text_ {  
+.text_ {
   font-size: 23px;
   color: var(--text6);
   padding: 2px 2px 2px 12px;
@@ -351,6 +356,25 @@ button {
   
   &::placeholder {
     color: var(--gray-500);
+  }
+}
+
+.width-12-chars {
+  width: 12ch;
+  font-family: monospace;
+}
+
+.info {
+  background-color: var(--info);
+  border: 1px solid var(--text-bcg-4);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+  font-family: Arial, sans-serif;
+
+  p {
+      margin: 0 0 10px 0;
+      line-height: 1.5;
   }
 }
 
@@ -379,6 +403,39 @@ button {
   }
 }
 
+input[type="radio"] {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 33%;
+  background-color: var(--text-bcg-1);
+  cursor: pointer;
+  position: relative;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+
+  &:hover {
+    border-color: var(--button-1-bgc);
+  }
+
+  &:checked {
+    background-color: var(--button-1-bgc);
+    border-color: var(--button-1-bgc);
+
+    &::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 9px;
+      height: 9px;
+      background-color: var(--text-bcg-2);
+      border-radius: 33%;
+    }
+  }
+}
 
 .function-item {
   display: flex;

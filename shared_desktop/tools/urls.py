@@ -10,6 +10,7 @@ from . import (
     views, openpyxl, crcpeek, swarco_log,
     get_firmware, swarco_ssh
 )
+from .openpyxl import OpenpyxlAPIView
 from .swarco_log import SwarcoLogView
 from .toolkit.views import (
     ControllerManagementAPI,
@@ -69,6 +70,8 @@ urlpatterns = [
     path('set_phase/', phase_control.set_phase, name='set_phase'),
 
     path('openpyxl/', openpyxl.openpyxl, name='openpyxl'),
+    path('api/openpyxl/', OpenpyxlAPIView.as_view(), name='openpyxl-api'),
+    path('api/parameter-sets/<str:name>/', OpenpyxlAPIView.as_view(), name='parameter-sets-detail'),
     path('crcpeek/', crcpeek.crcpeek, name='crcpeek'),
     path('swarco_log/', swarco_log.swarco_log, name='swarco_log'),
     path('swarco_log_api/', SwarcoLogView.as_view(), name='api_swarco_log'),

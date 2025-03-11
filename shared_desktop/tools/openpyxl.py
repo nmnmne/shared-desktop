@@ -1,10 +1,127 @@
 from django.shortcuts import redirect, render
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 from django.http import HttpResponse
 from openpyxl import load_workbook, Workbook
 from io import BytesIO
 from tools.models import PhaseParameterSet
+from tools.serializers import PhaseParameterSetSerializer
 from collections import defaultdict
 from datetime import datetime, timedelta
+
+
+class OpenpyxlAPIView(APIView):
+    def get(self, request, name=None):
+        if name:
+            try:
+                selected_set = PhaseParameterSet.objects.get(name=name)
+                serializer = PhaseParameterSetSerializer(selected_set)
+                return Response(serializer.data)
+            except PhaseParameterSet.DoesNotExist:
+                return Response({"error": "Набор параметров не найден."}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            parameter_sets = PhaseParameterSet.objects.all()
+            serializer = PhaseParameterSetSerializer(parameter_sets, many=True)
+            return Response(serializer.data)
+
+    def post(self, request):
+        print("Входящие данные (request.data):")
+        for key, value in request.data.items():
+            if hasattr(value, 'read'):  # Проверяем, является ли значение файлом
+                print(f"{key}: <InMemoryUploadedFile>")
+            else:
+                print(f"{key}: {value}")
+        print("Входящие файлы (request.FILES):", request.FILES)
+        if 'upload_button' in request.data:
+            selected_set_name = request.data.get("parameter_set")
+            try:
+                selected_set = PhaseParameterSet.objects.get(name=selected_set_name)
+                serializer = PhaseParameterSetSerializer(selected_set)
+                return Response(serializer.data)
+            except PhaseParameterSet.DoesNotExist:
+                return Response({"error": "Выбранные настройки не найдены."}, status=status.HTTP_404_NOT_FOUND)
+
+        elif 'save_button' in request.data:
+            name = request.data.get("name")
+            base_name = name
+            counter = 1
+            while PhaseParameterSet.objects.filter(name=name).exists():
+                name = f"{base_name}_{counter}"
+                counter += 1
+
+            primary_group = request.data.get("primary_group")
+            groups = {f"group{i}": request.data.get(f"group{i}") for i in range(1, 21)}
+            phases = {f"phases{i}": request.data.get(f"phases{i}") for i in range(1, 21)}
+
+            data = {"primary_group": primary_group, **groups, **phases}
+            PhaseParameterSet.objects.create(name=name, data=data)
+            return Response({"status": "saved", "name": name}, status=status.HTTP_201_CREATED)
+
+        elif 'process_button' in request.data:
+            if 'file' in request.FILES:
+                try:
+                    excel_file = request.FILES['file']
+                    workbook = load_workbook(excel_file)
+                    sheet = workbook.active
+                    sheet.title = "Данные"
+                    primary_group = request.data.get("primary_group")
+                    interval_minutes = int(request.data.get("interval", 60))
+                    group_mapping = {f"group{i}": request.data.get(f"group{i}") for i in range(1, 21)}
+
+                    rows = list(sheet.iter_rows(min_row=2, values_only=True))
+                    sorted_rows = sorted(rows, key=lambda row: row[0] if row[0] is not None else '')
+                    new_rows = [split_record_by_minute(row) for row in sorted_rows]
+                    sorted_rows = [item for sublist in new_rows for item in sublist]
+
+                    phases = {}
+                    for i in range(1, 21):
+                        group = request.data.get(f"group{i}")
+                        phase = request.data.get(f"phases{i}")
+                        if phase:
+                            phase_list = [p.strip() for p in phase.split(',')]
+                            for p in phase_list:
+                                if p not in phases:
+                                    phases[p] = []
+                                if group:
+                                    phases[p].append(group)
+
+                    phases['-1'] = ['-1']
+
+                    sheet.cell(row=1, column=4, value="Направления")
+                    sheet.cell(row=1, column=5, value="Общая длительность")
+                    sheet.cell(row=1, column=6, value="Счетчик циклов")
+                    sheet.cell(row=1, column=7, value="Циклы за час")
+                    sheet.column_dimensions['D'].width = 20
+                    sheet.column_dimensions['E'].width = 20
+                    sheet.column_dimensions['F'].width = 18
+                    sheet.column_dimensions['G'].width = 15
+
+                    sheet = calculate_total_duration(sheet, sorted_rows, phases)
+                    sheet = calculate_cycle_count(sheet, sorted_rows, phases, primary_group, group_mapping)
+                    sheet = calculate_cycles_per_hour(sheet, sorted_rows, interval_minutes)
+                    sheet = calculate_total_duration_per_group(sheet, sorted_rows, group_mapping, interval_minutes)
+
+                    workbook = create_filtered_sheet_and_transfer_data(sheet, interval_minutes)
+                    workbook = create_filtered_sheet_and_transfer_data_2(sheet)
+
+                    for i in range(min(3, len(workbook.worksheets))):
+                        workbook.worksheets[i].freeze_panes = "A2"
+
+                    virtual_workbook = BytesIO()
+                    workbook.save(virtual_workbook)
+                    virtual_workbook.seek(0)
+
+                    response = HttpResponse(virtual_workbook, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+                    response['Content-Disposition'] = 'attachment; filename="openpyxl.xlsx"'
+                    return response
+                except Exception as e:
+                    print("Ошибка при обработке файла:", str(e))
+                    return Response({"error": "Ошибка при обработке файла."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            else:
+                return Response({"error": "Файл не найден."}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({"error": "Неизвестная операция."}, status=status.HTTP_400_BAD_REQUEST)
 
 
 def openpyxl(request):
@@ -58,12 +175,20 @@ def openpyxl(request):
                 sheet = workbook.active
                 sheet.title = "Данные"
                 primary_group = request.POST.get("primary_group")
-
+                interval_minutes = int(request.POST.get("interval", 60))
                 # Создаем маппинг для групп
                 group_mapping = {f"group{i}": request.POST.get(f"group{i}") for i in range(1, 21)}
 
                 rows = list(sheet.iter_rows(min_row=2, values_only=True))
                 sorted_rows = sorted(rows, key=lambda row: row[0] if row[0] is not None else '')
+
+                # Разбиваем записи на промежуточные
+                new_rows = []
+                for row in sorted_rows:
+                    new_rows.extend(split_record_by_minute(row))
+
+                # Обновляем sorted_rows
+                sorted_rows = new_rows
 
                 phases = {}
                 for i in range(1, 21):
@@ -92,11 +217,11 @@ def openpyxl(request):
                 # Вызываем методы для подсчета общей длительности, счетчика циклов и циклов за час
                 sheet = calculate_total_duration(sheet, sorted_rows, phases)
                 sheet = calculate_cycle_count(sheet, sorted_rows, phases, primary_group, group_mapping)
-                sheet = calculate_cycles_per_hour(sheet, sorted_rows)
-                sheet = calculate_total_duration_per_group(sheet, sorted_rows, group_mapping)
+                sheet = calculate_cycles_per_hour(sheet, sorted_rows, interval_minutes)
+                sheet = calculate_total_duration_per_group(sheet, sorted_rows, group_mapping, interval_minutes)
 
                 # Вызываем метод для создания нового листа и переноса данных
-                workbook = create_filtered_sheet_and_transfer_data(sheet)
+                workbook = create_filtered_sheet_and_transfer_data(sheet, interval_minutes)
                 workbook = create_filtered_sheet_and_transfer_data_2(sheet)
 
                 # Закрепляем первую строку на всех листах
@@ -117,6 +242,38 @@ def openpyxl(request):
         "data": data,
     }
     return render(request, "tools/openpyxl.html", context)
+
+def split_record_by_minute(record):
+    start_time, phase, duration = record
+    start_time = datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S") if isinstance(start_time, str) else start_time
+    records = []
+    
+    while duration > 0:
+        next_minute = (start_time.replace(second=0, microsecond=0)) + timedelta(minutes=1)
+        time_diff = (next_minute - start_time).total_seconds()
+        
+        if duration <= time_diff:
+            # Если оставшаяся длительность меньше или равна разнице до следующей минуты
+            if duration > 1:
+                # Разделяем на две записи: основную часть и последнюю секунду
+                records.append((start_time, phase, round(duration - 1)))
+                records.append((start_time + timedelta(seconds=duration - 1), phase, 1))
+            else:
+                # Если длительность 1 секунда, просто добавляем одну запись
+                records.append((start_time, phase, 1))
+            break
+        else:
+            # Разделяем текущую минуту на две записи
+            # Первая запись: от start_time до next_minute - 1 секунда
+            records.append((start_time, phase, round(time_diff - 1)))
+            # Вторая запись: последняя секунда минуты
+            records.append((next_minute - timedelta(seconds=1), phase, 1))
+            
+            # Обновляем start_time и уменьшаем duration
+            duration -= time_diff
+            start_time = next_minute
+    
+    return records
 
 def calculate_total_duration(sheet, sorted_rows, phases):
     current_direction = None
@@ -195,48 +352,47 @@ def calculate_cycle_count(sheet, sorted_rows, phases, primary_group, group_mappi
 
     return sheet
 
-def calculate_cycles_per_hour(sheet, sorted_rows):
-    hourly_cycle_count = {}
-    last_seen_hour = None
-    starting_cycle = None
-    ending_cycle = None
-    first_valid_cycle = None
+def calculate_cycles_per_hour(sheet, sorted_rows, interval_minutes=60):
+    last_seen_time = None  # Последнее обработанное время
+    starting_cycle = None  # Начальное значение счетчика циклов для текущего интервала
+    ending_cycle = None    # Конечное значение счетчика циклов для текущего интервала
 
     for idx, row in enumerate(sorted_rows, start=2):
-        time_cell = sheet.cell(row=idx, column=1).value
-        current_cycle = sheet.cell(row=idx, column=6).value
+        time_cell = sheet.cell(row=idx, column=1).value  # Время из столбца 1
+        current_cycle = sheet.cell(row=idx, column=6).value  # Счетчик циклов из столбца 6
 
         if time_cell:
-            current_hour = time_cell.replace(minute=0, second=0, microsecond=0)
+            # Округляем время до ближайшего интервала
+            current_time = time_cell.replace(second=0, microsecond=0)
+            interval = timedelta(minutes=interval_minutes)
+            rounded_time = (current_time.replace(minute=0) + timedelta(minutes=(current_time.minute // interval_minutes)) * interval_minutes)
 
-            # Если час изменился
-            if current_hour != last_seen_hour:
-                if last_seen_hour is not None:
-                    if ending_cycle is not None and first_valid_cycle is not None:
-                        # Считаем циклы с 1, игнорируя начальные нулевые циклы
-                        cycles_per_hour = (ending_cycle - first_valid_cycle) + 1
-                        sheet.cell(row=idx - 1, column=7, value=cycles_per_hour)
+            # Если время изменилось на новый интервал
+            if rounded_time != last_seen_time:
+                if last_seen_time is not None:
+                    # Подсчет циклов за предыдущий интервал
+                    if starting_cycle is not None and ending_cycle is not None:
+                        cycles_per_interval = ending_cycle - starting_cycle
+                        sheet.cell(row=idx - 1, column=7, value=cycles_per_interval)
 
-                # Обновляем для нового часа
+                # Обновляем для нового интервала
                 starting_cycle = current_cycle
-                first_valid_cycle = starting_cycle if starting_cycle and starting_cycle > 0 else None
-                last_seen_hour = current_hour
+                last_seen_time = rounded_time
 
+            # Обновляем конечное значение счетчика циклов
             ending_cycle = current_cycle
-            if first_valid_cycle is None and current_cycle > 0:
-                first_valid_cycle = current_cycle
 
-    # Обработка последнего часа
-    if starting_cycle is not None and ending_cycle is not None and first_valid_cycle is not None:
-        cycles_per_hour = (ending_cycle - first_valid_cycle) + 1
-        sheet.cell(row=idx, column=7, value=cycles_per_hour)
-        
+    # Обработка последнего интервала
+    if last_seen_time is not None and starting_cycle is not None and ending_cycle is not None:
+        cycles_per_interval = ending_cycle - starting_cycle
+        sheet.cell(row=idx, column=7, value=cycles_per_interval)
+
     return sheet
 
-def calculate_total_duration_per_group(sheet, sorted_rows, group_mapping):
-    hourly_duration = defaultdict(lambda: defaultdict(float))
-    last_seen_hour = None
-    group_columns = {}
+def calculate_total_duration_per_group(sheet, sorted_rows, group_mapping, interval_minutes):
+    interval_duration = defaultdict(lambda: defaultdict(float))  # Хранение данных по интервалам
+    last_seen_interval = None  # Последний обработанный интервал
+    group_columns = {}  # Столбцы для групп
 
     # Создаем маппинг столбцов для групп только если есть группы
     header_row = 1
@@ -249,34 +405,39 @@ def calculate_total_duration_per_group(sheet, sorted_rows, group_mapping):
             col_idx += 1
 
     for idx, row in enumerate(sorted_rows, start=2):
-        time_cell = sheet.cell(row=idx, column=1).value
-        duration_value = sheet.cell(row=idx, column=3).value
-        direction_cell = sheet.cell(row=idx, column=4).value
+        time_cell = sheet.cell(row=idx, column=1).value  # Время из столбца 1
+        duration_value = sheet.cell(row=idx, column=3).value  # Длительность из столбца 3
+        direction_cell = sheet.cell(row=idx, column=4).value  # Направления из столбца 4
 
         if time_cell:
-            current_hour = time_cell.replace(minute=0, second=0, microsecond=0)
+            # Округляем время до ближайшего интервала
+            interval = timedelta(minutes=interval_minutes)
+            current_time = time_cell.replace(second=0, microsecond=0)
+            rounded_time = (current_time.replace(minute=0) + 
+                            timedelta(minutes=(current_time.minute // interval_minutes)) * interval_minutes)
 
-            if current_hour != last_seen_hour:
-                # Записываем суммы длительностей за предыдущий час
-                if last_seen_hour is not None:
+            # Если интервал изменился
+            if rounded_time != last_seen_interval:
+                # Записываем суммы длительностей за предыдущий интервал
+                if last_seen_interval is not None:
                     for group, col_idx in group_columns.items():
-                        sheet.cell(row=idx - 1, column=col_idx, value=hourly_duration[last_seen_hour][group])
+                        sheet.cell(row=idx - 1, column=col_idx, value=interval_duration[last_seen_interval][group])
 
-                # Обновляем для нового часа
-                last_seen_hour = current_hour
-                hourly_duration[last_seen_hour] = defaultdict(float)
+                # Обновляем для нового интервала
+                last_seen_interval = rounded_time
+                interval_duration[last_seen_interval] = defaultdict(float)
 
             # Суммируем длительности для групп
             if direction_cell:
                 groups = [group.strip() for group in direction_cell.split(',')]
                 for group in groups:
                     if group in group_columns:
-                        hourly_duration[current_hour][group] += duration_value
+                        interval_duration[rounded_time][group] += duration_value
 
-    # Записываем длительности за последний час
-    if last_seen_hour:
+    # Записываем длительности за последний интервал
+    if last_seen_interval:
         for group, col_idx in group_columns.items():
-            sheet.cell(row=idx, column=col_idx, value=hourly_duration[last_seen_hour][group])
+            sheet.cell(row=idx, column=col_idx, value=interval_duration[last_seen_interval][group])
 
     # Переименовываем столбцы после всех вычислений
     for group, col_idx in group_columns.items():
@@ -294,10 +455,9 @@ def calculate_total_duration_per_group(sheet, sorted_rows, group_mapping):
         else:
             sheet.column_dimensions[sheet.cell(row=header_row, column=col_idx).column_letter].width = 16
 
-
     return sheet
 
-def create_filtered_sheet_and_transfer_data(sheet):
+def create_filtered_sheet_and_transfer_data(sheet, interval_minutes):
     """Создание нового листа и перенос данных с округлением времени к следующему часу."""
 
     # Создаем новый лист в рабочей книге с заданным названием
@@ -334,10 +494,10 @@ def create_filtered_sheet_and_transfer_data(sheet):
         if sheet.cell(row=row_index, column=7).value:  # Проверяем, есть ли данные в столбце G
             end_time = sheet.cell(row=row_index, column=1).value
 
-            if isinstance(end_time, datetime):  # Проверяем, что значение - это дата/время
-                # Округляем время до следующего часа
-                start_time = end_time.replace(minute=0, second=0, microsecond=0)
-                end_time = start_time + timedelta(hours=1)
+            if isinstance(end_time, datetime):
+                rounded_minute = (end_time.minute // interval_minutes) * interval_minutes
+                start_time = end_time.replace(second=0, microsecond=0, minute=rounded_minute)
+                end_time = start_time + timedelta(minutes=int(interval_minutes))
 
                 # Форматируем строку периода
                 period_str = f"{start_time.strftime('%d-%m-%Y с %H:%M')} до {end_time.strftime('%H:%M')}"

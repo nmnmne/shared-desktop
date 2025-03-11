@@ -68,7 +68,6 @@ MIDDLEWARE = [
 ]
 MIDDLEWARE.insert(0, 'corsheaders.middleware.CorsMiddleware')
 
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
