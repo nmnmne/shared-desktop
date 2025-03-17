@@ -17,7 +17,7 @@ $(document).ready(function(){
 
 const CONTROLLERS = ['Swarco', 'Поток (S)', 'Поток (P)', 'Peek']
 
-const TOKEN = 'fb682e5942fa8ce5c26ab8cd3e8eaba41c4cd961';
+const TOKEN = '';
 const ROOT_ROUTE_API = '/api/v1/'
 const ROOT_ROUTE_API_GET_TRAFFIC_LIGHT_OBJECT = '/api/v1/trafficlight-objects/'
 const ROUTE_API_DOWNLOAD_CONFIG = `${ROOT_ROUTE_API}download-config/`;
