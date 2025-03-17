@@ -41,4 +41,10 @@ const handleChangeTool = (tool) => {
   height: 100%;
 }
 
+@media (max-width: 900px) {
+  .tools-page {
+    display: block;
+  }
+}
+
 </style>

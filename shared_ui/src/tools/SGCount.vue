@@ -12,7 +12,7 @@
       <span @click="toggleVisibility" style="cursor: pointer; user-select: none; margin: 7px;">
         {{ isVisible ? 'Скрыть ^' : 'Сохранить новые настройки >' }}
       </span></div>
-      <div class="form-inline" style="margin-bottom: 100px;" :class="{ hidden: !isVisible }">
+      <div class="form-inline" style="margin-bottom: 600px;" :class="{ hidden: !isVisible }">
         <input
           type="text"
           class="text"
@@ -25,7 +25,7 @@
       
     </div>
     <div id="main-form">
-      <div class="form-inline">
+      <div class="form-inline" style="margin-bottom: 2px;">
         <select class="select" v-model="selectedParameterSet" @change="triggerUpload">
           <option value="" disabled>Выберите сохраненные настройки</option>
           <option v-for="set in parameterSets" :key="set.name" :value="set.name">
@@ -44,7 +44,7 @@
         </div>
       </div>
   
-      <div class="form-inline" style="margin-bottom: 30px;">
+      <div class="form-inline" style="margin-bottom: 19px;">
         <input type="file" class="custom-file-input" @change="handleFileUpload" />
         <button type="button" class="batton" style="width: 176px" @click="handleSubmit('process_button')">Обработать</button>
       </div>
@@ -72,7 +72,7 @@
           <input
             type="text"
             class="minitext"
-            style="width: 11ch;"
+            style="width: 20ch;"
             :id="`group${i}`"
             :name="`group${i}`"
             placeholder="Сигнальная группа"
@@ -82,7 +82,7 @@
           <input
             type="text"
             class="minitext"
-            style="width: 58ch;"
+            style="width: 68ch;"
             :id="`phases${i}`"
             :name="`phases${i}`"
             placeholder="Фазы"

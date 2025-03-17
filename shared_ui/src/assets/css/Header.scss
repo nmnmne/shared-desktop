@@ -8,6 +8,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  max-width: 100%;
 }
 
 .brand {
@@ -86,5 +87,10 @@
 @media (max-width: 550px) {
   .brand label {
     display: none;
+  }
+}
+@media (max-width: 500px) {
+  .nav-list {
+    font-size: 15px;
   }
 }

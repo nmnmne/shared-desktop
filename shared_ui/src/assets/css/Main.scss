@@ -330,12 +330,19 @@ button {
   border-radius: 6px;
   width: 100%;
   font-family: monospace;
-  
+
+  // Фон при фокусе
   &:focus {
-    border-color: var(--gray-600); 
-    outline: none; 
+    border-color: var(--text-bcg-4);
+    outline: none;
+    background-color: var(--text-bcg-4); // Когда в фокусе
   }
-  
+
+  // Фон, когда есть текст в поле
+  &:not(:placeholder-shown) {
+    background-color: var(--text-bcg-4); // Когда введен текст
+  }
+
   &::placeholder {
     color: var(--gray-500);
   }
@@ -493,5 +500,43 @@ input[type="radio"] {
     &:hover {
       color: var(--button-2-bgc);
     }
+  }
+}
+
+.form-inline-media {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+}
+
+.text-small {
+  width: 9ch;
+}
+
+.text-mid {
+  width: 18ch;
+}
+
+.margin-top {
+  margin-top: 30px;
+}
+
+@media (max-width: 500px) {
+  .form-inline-media {
+    flex-direction: column;
+  }
+  .form-inline-media[style*="flex-direction: column"] #search_host {
+    width: 99ch;
+  }
+  .text-small {
+    width: 100%;
+  }
+  .text-mid {
+    width: 100%;
+  }
+  .margin-bottom {
+    margin-bottom: 39px;
   }
 }
