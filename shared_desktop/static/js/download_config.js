@@ -389,7 +389,7 @@ function ipV4IsValid(ip) {
 
 function waitingEffect(state) {
   if (state) {
-    btnDownloadConfig.textContent = 'Ожидайте, идет процесс загрузки'
+    btnDownloadConfig.textContent = 'Идет процесс загрузки'
     btnDownloadConfig.disabled = true;
   }
   else {
