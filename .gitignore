@@ -117,6 +117,11 @@ celerybeat.pid
 # SageMath parsed files
 *.sage.py
 
+# controller_management
+shared_desktop/data_hosts.json
+shared_desktop/data_hosts_after_queryset.json
+shared_desktop/controller_management.json
+
 # Environments
 .env
 .venv
