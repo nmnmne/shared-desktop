@@ -22,7 +22,7 @@ const sidebarNav = ref([
   {
     id: 1,
     title: "Процессы",
-    toolName: "PeekProcesses",
+    toolName: "peek_processes",
   },
   {
     id: 2,

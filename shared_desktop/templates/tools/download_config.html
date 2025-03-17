@@ -11,28 +11,48 @@
         <!-- Правая часть страницы -->
         <div class="col-md-8">
           <h2>Скачать конфигурацию Swarco</h2>
-<div id="main_data">
-      <input type="radio" class="search_parameter" value="use_ip" name="search_option" id="by_ipAddr">
-      <label for="by_ipAddr">Задать параметры вручную</label>
-      <input type="text" disabled placeholder="ip-адресс ДК"  id="ip_controller" maxlength="15">
-      <select disabled id="type_controller_from_user">
-            <option value="Swarco"> Swarco </option>
-      </select>
-      <br>
-      {% csrf_token %}
-      <input type="radio" class="search_parameter"  value="use_search_in_db" name="search_option" checked id="by_search_in_db">
-      <label for="by_search_in_db">Поиск в базе данных</label>
-      <input type="text" placeholder="Поиск по номеру СО"  id="search_controller"> <br> <br>
-      Результат поиска: <br>
-      <label id="ip_addr">IP-адресс ДК :<label class="search_result_content" id="ip_addr_val"></label></label> <br>
-      <label id="type_controller">Тип ДК: <label class="search_result_content" id="type_controller_val"></label></label> <br>
-      <label id="address">Адресс: <label class="search_result_content" id="address_val"></label></label> <br>
-      <label id="descripton">Описание: <label class="search_result_content" id="description_val"></label></label> <br>
-      <button id="get_config" disabled> Отправить запрос </button><br>
+          <div id="main_data">
+            {% csrf_token %}
+            <div class="form-group row mb-2">
+              <div class="col-9 d-flex align-items-center">
+                <div class="col-md-5">
+                  <input type="text" class="form-control" placeholder="Поиск по номеру СО"  id="search_controller">
+                </div>
+                <div class="col-md-1 d-flex justify-content-center align-items-center">
+                  <input type="radio" class="search_parameter form-check-input"  value="use_search_in_db" name="search_option" checked id="by_search_in_db">
+                </div>
+              </div>
+            </div>
+            <div class="form-group row mb-2">
+              <div class="col-9 d-flex align-items-center">
+                <div class="col-md-5">
+                  <input type="text" class="form-control" disabled placeholder="ip-адресс ДК"  id="ip_controller" maxlength="15">
+                </div>
+                <div class="col-md-1 d-flex justify-content-center align-items-center">
+                  <input type="radio" class="search_parameter form-check-input" value="use_ip" name="search_option" id="by_ipAddr">
+                </div>
+                <div class="col-md-5">
+                  <select disabled id="type_controller_from_user" style="display: none;" class="form-control">
+                    <option value="Swarco"> Swarco </option>
+                  </select>
+                </div>
+              </div>
+            </div>
 
-</div>
-
-
+            Результат поиска: <br>
+            <div class="form-group row mb-2">
+              <label id="ip_addr">IP-адресс ДК :<label class="search_result_content" id="ip_addr_val"></label></label> <br>
+              <label id="type_controller">Тип ДК: <label class="search_result_content" id="type_controller_val"></label></label> <br>
+              <label id="address">Адресс: <label class="search_result_content" id="address_val"></label></label> <br>
+              <label id="descripton">Описание: <label class="search_result_content" id="description_val"></label></label> <br>
+            </div>
+            <div class="form-group row mb-2 ">
+            <div class="col-md-3 mr-2" style="margin-left: 10px; width: 267px;">
+              <div class="form-group row">
+                <button id="get_config" class="btn btn-primary" disabled> Отправить запрос </button><br>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

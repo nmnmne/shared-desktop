@@ -36,6 +36,7 @@ body.dark-theme {
   --green1: #8cafb2;
   --hover-hdr: #2e2f47;
   --hover-sbr: #535f74;
+  --yellow: #997a40;
 
   --gray-50: #1e1e1e;
   --gray-100: #ececec;
@@ -90,6 +91,7 @@ body {
   --green1: #7ac483;
   --hover-hdr: #94a9cd;
   --hover-sbr: #5e81bd;
+  --yellow: #d8b163;
 
   --gray-50: #1e1e1e;
   --gray-100: #ececec;
@@ -331,16 +333,14 @@ button {
   width: 100%;
   font-family: monospace;
 
-  // Фон при фокусе
   &:focus {
     border-color: var(--text-bcg-4);
     outline: none;
-    background-color: var(--text-bcg-4); // Когда в фокусе
+    background-color: var(--text-bcg-4);
   }
 
-  // Фон, когда есть текст в поле
   &:not(:placeholder-shown) {
-    background-color: var(--text-bcg-4); // Когда введен текст
+    background-color: var(--text-bcg-4);
   }
 
   &::placeholder {
@@ -351,7 +351,7 @@ button {
 .text_ {
   font-size: 23px;
   color: var(--text6);
-  padding: 2px 2px 2px 12px;
+  padding: 1px 2px 2px 12px;
   border-radius: 6px;
   width: 100%;
   font-family: monospace;

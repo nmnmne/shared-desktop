@@ -7,7 +7,7 @@ import vueformConfig from './../vueform.config';
 import axios from 'axios';
 
 const app = createApp(App);
-console.log('API Token in main.js:', import.meta.env.VITE_API_TOKEN);
+// console.log('API Token in main.js:', import.meta.env.VITE_API_TOKEN);
 // Добавляем axios в глобальные свойства
 app.config.globalProperties.$axios = axios;
 

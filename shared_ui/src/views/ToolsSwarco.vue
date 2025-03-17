@@ -2,29 +2,36 @@
   <div class="tools-page">
     <SidebarSwarco :toolsData="toolsData" @change-tool="handleChangeTool" />
     <div class="tools">
-      <div v-if="!currentTool">Выберите инструмент</div>
+      <div v-if="!toolName">Выберите инструмент</div>
       <div v-else>
-        <SwarcoITC v-if="currentTool.toolName === 'SwarcoITC'" />
-        <SwarcoLog v-if="currentTool.toolName === 'SwarcoLog'" />
+        <SwarcoITC v-if="toolName === 'swarco_itc'" />
+        <SwarcoLog v-if="toolName === 'swarco_log'" />
+        <DownloadConfig v-if="toolName === 'download_config'" />
       </div>
-
     </div>
   </div>
 </template>
 
 <script setup>
+import { ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import SidebarSwarco from "@/components/SidebarSwarco.vue";
 import SwarcoITC from "@/tools/SwarcoITC.vue";
 import SwarcoLog from "@/tools/SwarcoLog.vue";
-import {onMounted, ref} from "vue";
-// import Tool1 from "@/tools/Tool1.vue";
+import DownloadConfig from "@/tools/DownloadConfig.vue";
 
+const route = useRoute();
+const router = useRouter();
 const toolsData = ref(null);
-const currentTool = ref(null);
+const toolName = ref(route.params.toolName || null);
+
+watch(() => route.params.toolName, (newTool) => {
+  toolName.value = newTool || null;
+});
 
 const handleChangeTool = (tool) => {
-  currentTool.value = tool;
-}
+  router.push(`/tools_swarco/${tool.toolName}`);
+};
 
 </script>
 

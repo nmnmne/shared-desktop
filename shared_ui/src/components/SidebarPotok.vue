@@ -22,17 +22,17 @@ const sidebarNav = ref([
   {
     id: 1,
     title: "Перезагрузить WEB",
-    toolName: "RestartWebAdmin",
+    toolName: "restart_web_admin",
   },
   {
     id: 2,
     title: "Генератор строк",
-    toolName: "DtPotok",
+    toolName: "dt_potok",
   },
   {
     id: 3,
     title: "Работа с конфигуратором",
-    toolName: "PotokTLC",
+    toolName: "potok_tlc",
   },
 ]);
 

@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <h2></h2>
+  <div class="container">
+    <h2 class="title">Здесь заголовок</h2>
   </div>
 </template>
 
@@ -9,27 +9,35 @@ import { serverIPs } from '@/assets/js/config';
 import axios from 'axios';
 
 export default {
-  name: "",
+  name: "здесь название",
   data() {
     return {
-      condition: "",
-      functions: [],
-      conditionResult: "",
       token: import.meta.env.VITE_API_TOKEN,
-      apiPath: "",
       serverIPs: serverIPs,
+      apiPath1: "здесь апи путь",
+      responseData: null,
     };
   },
   methods: {
     async sendData() {
       for (let ip of this.serverIPs) {
-        let server = `http://${ip}${this.apiPath}`;
+        let server = `http://${ip}${this.apiPath1}`;
+        const params = {
+          key: "значение",
+        };
 
         try {
-          const response = await axios.post(server, this.transformedProcesses);
-          this.responseData = response.data.repaired_cmd_sg;
+          const response = await axios.post(server, {
+            params,
+            headers: {
+              Authorization: `Token ${this.token}`,
+            },
+          });
+
+          console.log("/Response/", response)
+
+          this.responseData = response;
           this.responseIsError = false;
-          this.showModal = true;
           return;
         } catch (error) {
           console.warn(`Ошибка подключения к ${server}:`, error);
@@ -39,7 +47,6 @@ export default {
       // Если ни один сервер не ответил
       this.responseMessage = "Ошибка при отправке данных ко всем серверам.";
       this.responseIsError = true;
-      this.showModal = true;
     }
   }
 };
