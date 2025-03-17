@@ -45,7 +45,7 @@ async def get_phase(request):
             )
             
             if error_indication:
-                countdown_str = f"Ошибка: {error_indication}"
+                countdown_str = f"Ошибка!"
             else:
                 try:
                     # Получаем значение статуса фазы

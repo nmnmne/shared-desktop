@@ -9,6 +9,12 @@
   flex-shrink: 0;
 }
 
+@media (max-width: 900px) {
+  .sidebar {
+    max-width: 100%;
+  }
+}
+
 .sidebar__list {
   list-style: none;
   padding: 0;

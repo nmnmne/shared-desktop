@@ -32,14 +32,12 @@ class ControllerManagementHostsConfigurationViewSetAPI(viewsets.ModelViewSet):
 
 
 class SearchByNumberTrafficLightsAPIVeiw(generics.RetrieveAPIView):
-    permission_classes = (IsAuthenticated,)
     queryset = TrafficLightsObjects.objects.all()
     serializer_class = BaseTrafficLightsSerializer
     lookup_field = 'number'
 
 
 class TrafficLightsUpdate(APIView):
-    permission_classes = (IsAdminUser, IsAuthenticated)
 
     def post(self, request):
         start_time = time.time()
@@ -83,8 +81,6 @@ class ControllerManagementAPI(APIView):
     """
     Управление/получение данных/загрузка конфига с контроллеров
     """
-
-    permission_classes = (IsAuthenticated,)
 
     def post(self, request):
 
@@ -154,7 +150,6 @@ class ControllerManagementAPI(APIView):
 
 
 class GetFileFromControllerAPI(APIView):
-    permission_classes = (IsAuthenticated,)
 
     def post(self, request):
 
@@ -243,7 +238,7 @@ class CompareGroupsAPI(APIView):
     Управление/получение данных/загрузка конфига с контроллеров
     """
 
-    permission_classes = (IsAuthenticated,)
+    # permission_classes = (IsAuthenticated,)
 
     def post(self, request):
 
@@ -275,7 +270,6 @@ class CompareGroupsAPI(APIView):
 
 
 class PotokTrafficLightsConfiguratorAPI(APIView):
-    permission_classes = (IsAuthenticated,)
 
     get_functions_from_condition_string = 'get_functions_from_condition_string'
     get_condition_result = 'get_condition_result'
