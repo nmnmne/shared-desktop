@@ -17,11 +17,6 @@ $(document).ready(function(){
 
 const CONTROLLERS = ['Swarco', 'Поток (S)', 'Поток (P)', 'Peek']
 
-//home
-// const TOKEN = '7174fa6f9d0f954a92d2a5852a7fc3bcaace7578';
-//work
-//const TOKEN = 'a090474ab50a6ec440eef021295d5f0e750afa00';
-//shared_desktop
 const TOKEN = 'fb682e5942fa8ce5c26ab8cd3e8eaba41c4cd961';
 const ROOT_ROUTE_API = '/api/v1/'
 const ROOT_ROUTE_API_GET_TRAFFIC_LIGHT_OBJECT = '/api/v1/trafficlight-objects/'
