@@ -22,17 +22,17 @@ const sidebarNav = ref([
   {
     id: 1,
     title: "Сброс сессий пользователя 'itc'",
-    toolName: "SwarcoITC",
+    toolName: "swarco_itc",
   },
   {
     id: 2,
     title: "Рсшифровка логов",
-    toolName: "SwarcoLog",
+    toolName: "swarco_log",
   },
   {
     id: 3,
     title: "Скачать конфигурацию",
-    toolName: "",
+    toolName: "download_config",
   },
 ]);
 

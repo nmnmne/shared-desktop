@@ -22,33 +22,39 @@ const sidebarNav = ref([
   {
     id: 1,
     title: "API Дирижёр",
-    toolName: "ApiDir",
+    toolName: "api_dir",
   },
   {
     id: 2,
     title: "Управление фазой",
-    toolName: "PhaseControl",
+    toolName: "phase_control",
   },
   {
     id: 3,
+    title: "Управление контроллером",
+    toolName: "manage_controller",
+  },
+  {
+    id: 4,
     title: "Версия прошивки контроллера",
     toolName: "",
   },
   {
-    id: 4,
+    id: 5,
     title: "Калькулятор времени цикла",
     toolName: "",
   },
   {
-    id: 5,
-    title: "Длительность работы направлений",
-    toolName: "SGCount",
+    id: 6,
+    title: "Отчеты Дирижёра",
+    toolName: "sg_count",
   },
   {
-    id: 6,
+    id: 7,
     title: "Работа с паспортом",
     toolName: "",
   },
+
 ]);
 
 const activeTool = ref(null);
