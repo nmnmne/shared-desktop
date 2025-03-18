@@ -38,6 +38,10 @@ body.dark-theme {
   --hover-sbr: #535f74;
   --yellow: #997a40;
 
+  --display-bgc:#314a32;
+  --display-txt-1:#637261;
+  --display-txt-2:#99af97;
+
   --gray-50: #1e1e1e;
   --gray-100: #ececec;
   --gray-200: #e3e3e3;
@@ -92,6 +96,10 @@ body {
   --hover-hdr: #94a9cd;
   --hover-sbr: #5e81bd;
   --yellow: #d8b163;
+
+  --display-bgc:#d6f0cf;
+  --display-txt-1:#4e634a;
+  --display-txt-2:#3b1f06;
 
   --gray-50: #1e1e1e;
   --gray-100: #ececec;
@@ -517,6 +525,10 @@ input[type="radio"] {
 
 .text-mid {
   width: 18ch;
+}
+
+.width-100 {
+  width: 100%;
 }
 
 .margin-top {

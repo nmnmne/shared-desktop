@@ -17,7 +17,7 @@ export default defineConfig({
   server: {
     proxy: {
       // Прокси для конкретного эндпоинта
-      '/api/v1/traffic-lights/get-state-test': {
+      '/api/v1/traffic-lights/get-state': {
         target: 'http://192.168.45.93:8001', // Целевой сервер
         changeOrigin: true, // Меняет origin на целевой сервер
         secure: false, // Отключает проверку SSL (если используется HTTP)

@@ -1,56 +1,17 @@
 <template>
   <div class="container">
     <h2 class="title margin-bottom">Управление контроллером</h2>
-    <div class="form-inline-media">
-      <input
-        type="text text-small"
-        class="text"
-        id="search_host"
-        placeholder="Номер СО"
-        v-model="searchValue"
-        @input="handleInput"
-      />
+    <div class="form-inline">
+      <div class="form-column">
+        <input
+          type="text text-small"
+          class="text text-mid"
+          id="search_host"
+          placeholder="Номер СО"
+          v-model="searchValue"
+          @input="handleInput"
+        />
 
-      <select
-        id="timeout"
-        class="select text-small"
-        v-model="selectedTimeout"
-        @change="startPolling"
-      >
-        <option v-for="timeout in timeouts" :key="timeout" :value="timeout">{{ timeout }} сек</option>
-      </select>
-
-      <select
-        id="phase"
-        class="select text-small margin-bottom"
-        v-model="selectedPhase"
-      >
-        <option v-for="(value, index) in phases" :key="index" :value="value">
-          {{ index === 0 ? "LOCAL" : `${index} фаза` }}
-        </option>
-      </select>
-
-      <button
-        class="margin-bottom"
-        :disabled="!isFormValid"
-        @click="setPhase"
-      >
-        Включить
-      </button>
-
-      <div v-if="responseData" class="form-inline">
-        <pre class="text_">{{ responseData.countdown }}</pre>
-        <pre class="text_" style="color: goldenrod;">{{ stateResponse }}</pre>
-        <pre class="text_" style="color: yellowgreen;">{{ countdownTimer }} сек</pre>
-      </div>
-    </div>
-
-    <div class="margin-top">
-      <span @click="toggleVisibility" style="cursor: pointer; user-select: none; margin: 7px;">
-        {{ isVisible ? 'Скрыть ^' : 'Если не получается по номеру СО >' }}
-      </span>
-
-      <div :class="{ hidden: !isVisible }">
         <input
           type="text"
           id="ip_address"
@@ -67,6 +28,82 @@
           <option value="">Тип ДК</option>
           <option v-for="type in typesControllers" :key="type" :value="type">{{ type }}</option>
         </select>
+
+        <input
+          type="text"
+          class="text text-mid"
+          placeholder="."
+        />
+
+        <input
+          type="text"
+          class="text text-mid"
+          placeholder="."
+        />
+      </div>
+
+      <div class="form-column info-screen width-100">
+        <!-- Блок для Swarco -->
+        <div v-if="protocol === 'Swarco'">
+          <p>{{ protocol }}</p>
+          <div class="info-line width-100">
+            <span class="lcd-1">Текущий режим: </span>
+            <span class="lcd-2">{{ stateTestResponse?.current_mode || "Нет данных" }}</span>
+          </div>
+
+          <div class="info-line width-100">
+            <span class="lcd-1">План: </span>
+            <span class="lcd-2">{{ stateTestResponse?.current_plan || "Нет данных" }}</span>
+          </div>
+
+          <div class="info-line width-100">
+            <span class="lcd-1">Фаза: </span>
+            <span class="lcd-2">{{ stateTestResponse?.current_stage || "Нет данных" }}</span>
+          </div>
+
+          <div class="info-line width-100">
+            <span class="lcd-1">Лампы (режим сигнализации): </span>
+            <span class="lcd-2">{{ stateTestResponse?.current_status || "Нет данных" }}</span>
+          </div>
+
+          <div class="info-line width-100">
+            <span class="lcd-1">FIXED TIME STATUS: </span>
+            <span class="lcd-2">{{ stateTestResponse?.fixed_time_status || "Нет данных" }}</span>
+          </div>
+
+          <div class="info-line width-100">
+            <span class="lcd-1">Источник плана: </span>
+            <span class="lcd-2">{{ stateTestResponse?.plan_source || "Нет данных" }}</span>
+          </div>
+
+          <div class="info-line width-100">
+            <span class="lcd-1">Софт входы 180/181: </span>
+            <span class="lcd-2">{{ stateTestResponse?.status_soft_flag180_181 || "Нет данных" }}</span>
+          </div>
+        </div>
+
+        <!-- Блок для Поток -->
+        <div v-else-if="protocol === 'Поток (S)' || protocol ===  'Поток (P)'">
+          <div class="info-line width-100">
+            <span class="lcd-1">Поток </span>
+          </div>
+        </div>
+
+        <!-- Блок для Peek -->
+        <div v-else-if="protocol === 'Peek'">
+          <div class="info-line width-100">
+            <span class="lcd-1">Peek </span>
+          </div>
+        </div>
+
+        <!-- Пусто -->
+        <div v-else>
+          <div class="info-line width-100"><span class="lcd-1">Ожидание ввода данных</span></div>
+          <div class="info-line width-100"><pre> </pre></div>
+          <div class="info-line width-100"><pre> </pre></div>
+          <div class="info-line width-100"><pre> </pre></div>
+          <div class="info-line width-100"><pre>Этот инструмент пока на стадии разработки! </pre></div>
+        </div>
       </div>
     </div>
   </div>
@@ -80,27 +117,15 @@ export default {
   name: "ManageController",
   data() {
     return {
-      countdownTimer: 0,
-      countdownIntervalId: null,
-      isVisible: false,
       searchValue: "",
+      typesControllers: ["Swarco", "Поток (S)", "Поток (P)", "Peek"],
       ip: "",
       protocol: "",
-      typesControllers: ["Swarco", "Поток (S)", "Поток (P)", "Peek"],
       token: import.meta.env.VITE_API_TOKEN,
-      responseData: null,
-      stateResponse: null,
       stateTestResponse: null,
       intervalId: null,
-      selectedTimeout: 60,
-      timeouts: [10, 20, 30, 40, 60, 80, 100, 120, 140, 160, 180],
-      selectedPhase: 0,
-      phases: [0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 
-      16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
-      31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45,
-      46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60,
-      61, 62, 63, 64, 65],
-      timeoutId: null, // Добавляем timeoutId для debounce
+      statusMessage: "Ожидание данных...",
+      lastUpdateTime: "Нет данных",
     };
   },
   computed: {
@@ -111,11 +136,11 @@ export default {
   methods: {
     handleInput() {
       if (this.timeoutId) {
-        clearTimeout(this.timeoutId); // Сбрасываем предыдущий таймер
+        clearTimeout(this.timeoutId);
       }
       this.timeoutId = setTimeout(() => {
-        this.searchHost(); // Вызываем метод через 1 секунду
-      }, 1000);
+        this.searchHost();
+      }, 1500);
     },
     async searchHost() {
       const searchValue = this.searchValue.trim();
@@ -136,6 +161,7 @@ export default {
 
         this.ip = response.data.ip_adress || "";
         this.protocol = response.data.type_controller || "";
+        console.log("Протокол", protocol);
       } catch (error) {
         console.error("Ошибка при поиске по номеру СО:", error);
         if (error.response) {
@@ -144,69 +170,26 @@ export default {
         }
       }
     },
-    toggleVisibility() {
-      this.isVisible = !this.isVisible;
-    },
-    async fetchData() {
-      if (!this.ip || !this.protocol) {
-        this.responseData = null;
-        return;
-      }
-
-      try {
-        const serverIP = serverIPs[0];
-        const protocolMap = {
-          "Swarco": "STCIP",
-          "Поток (S)": "STCIP",
-          "Поток (P)": "UG405",
-          "Peek": "UTMC",
-        };
-        const selectedProtocol = protocolMap[this.protocol];
-
-        const url = `http://${serverIP}/get_phase`;
-        const params = {
-          ip_address: this.ip,
-          protocol: selectedProtocol,
-        };
-
-        const response = await axios.get(url, {
-          params,
-          headers: {
-            Authorization: `Token ${this.token}`,
-          },
-        });
-
-        if (this.responseData?.countdown !== response.data.countdown) {
-          this.startCountdown();
-        }
-
-        this.responseData = response.data;
-      } catch (error) {
-        console.error("Ошибка при запросе данных:", error);
-        this.responseData = { error: "Не удалось получить данные" };
-      }
-    },
     async fetchStateTest() {
       if (!this.ip || !this.protocol) {
-        this.stateResponse = null;
+        this.stateTestResponse = null;
+        this.statusMessage = "IP и тип контроллера не указаны";
         return;
       }
 
       try {
         const serverIP = serverIPs[0];
-        const url = `http://${serverIP}/api/v1/manage-controller/`;
+        const url = '/api/v1/traffic-lights/get-state';
 
         const requestData = {
           hosts: {
             [this.ip]: {
-              host_id: 1,
               type_controller: this.protocol,
-              request_entity: ["get_state"]
-            }
+            },
           },
-          num_hosts_in_request: 1,
-          type_request: "get_state"
         };
+
+        console.log("Отправляемый JSON:", JSON.stringify(requestData, null, 2));
 
         const response = await axios.post(url, requestData, {
           headers: {
@@ -214,108 +197,39 @@ export default {
           },
         });
 
-        console.log("/RES-manage-controller/", response.data)
+        console.log("RES", response.data);
+        console.log("PRTC", this.protocol);
+
         if (this.protocol === "Swarco") {
-          this.stateResponse = response.data[this.ip].responce_entity.raw_data.current_states.basic.current_mode;
+          this.stateTestResponse = response.data[this.ip].response.data;
         } else if (this.protocol === "Peek") {
-          this.stateResponse = response.data[this.ip].responce_entity.raw_data.current_states.basic.stream_info["1"].current_mode;
+          this.stateTestResponse = response.data[this.ip].response.data.streams_data[0];
         } else if (this.protocol === "Поток (P)") {
-          this.stateResponse = response.data[this.ip].responce_entity.raw_data.current_states.basic.current_mode;
+          this.stateTestResponse = response.data[this.ip].response.data;
         } else if (this.protocol === "Поток (S)") {
-          this.stateResponse = response.data[this.ip].responce_entity.raw_data.current_states.basic.current_mode;
+          this.stateTestResponse = response.data[this.ip].response.data;
         } else {
-          this.stateResponse = null; 
+          this.stateTestResponse = null;
         }
-    
-    //     const url = '/api/v1/traffic-lights/get-state-test';
 
-    // const requestData = {
-    //   hosts: {
-    //     [this.ip]: {
-    //       type_controller: this.protocol,
-    //     },
-    //   },
-    // };
-
-    //     console.log("Отправляемый JSON:", JSON.stringify(requestData, null, 2));
-
-    //     const response = await axios.post(url, requestData, {
-    //       headers: {
-    //         "Content-Type": "application/json",
-    //       },
-    //     });
-
-    //     console.log("RES", response.data)
-    //     console.log("PRTC", this.protocol)
-    //     if (this.protocol === "Swarco") {
-    //       this.stateTestResponse = response.data[this.ip].response.data.current_mode;
-    //     } else if (this.protocol === "Peek") {
-    //       this.stateTestResponse = response.data[this.ip].response.data.streams_data[0].current_mode;
-    //     } else if (this.protocol === "Поток (P)") {
-    //       this.stateTestResponse = response.data[this.ip].response.data.current_mode;
-    //     } else if (this.protocol === "Поток (S)") {
-    //       this.stateTestResponse = response.data[this.ip].response.data.current_mode;
-    //     } else {
-    //       this.stateTestResponse = null; 
-    //     }
-
+        this.statusMessage = "Данные успешно получены";
+        this.lastUpdateTime = new Date().toLocaleTimeString(); // Обновляем время последнего запроса
       } catch (error) {
         console.error("Ошибка при запросе данных:", error);
-        this.stateResponse = "";
+        this.statusMessage = "Ошибка при получении данных";
+        this.stateTestResponse = null;
       }
-    },
-    async setPhase() {
-      if (!this.isFormValid) return;
-
-      const serverIP = serverIPs[0];
-      const protocolMap = {
-        "Swarco": "STCIP",
-        "Поток (S)": "STCIP",
-        "Поток (P)": "UG405",
-        "Peek": "UTMC",
-      };
-      const selectedProtocol = protocolMap[this.protocol];
-
-      const url = `http://${serverIP}/set_phase`;
-      const params = {
-        ip_address: this.ip,
-        protocol: selectedProtocol,
-        phase_value: this.selectedPhase,
-        timeout: this.selectedTimeout,
-      };
-
-      const response = await axios.get(url, {
-        params,
-        headers: {
-          Authorization: `Token ${this.token}`,
-        },
-      });
-
     },
     startPolling() {
       this.stopPolling();
       this.intervalId = setInterval(() => {
-        this.fetchData();
         this.fetchStateTest();
-      }, this.selectedTimeout * 50);
+      }, 1500);
     },
     stopPolling() {
       if (this.intervalId) {
         clearInterval(this.intervalId);
         this.intervalId = null;
-      }
-    },
-    startCountdown() {
-      this.stopCountdown();
-      this.countdownTimer = 0;
-      this.countdownIntervalId = setInterval(() => {
-        this.countdownTimer += 1;
-      }, 1000);
-    },
-    stopCountdown() {
-      if (this.countdownIntervalId) {
-        clearInterval(this.countdownIntervalId);
-        this.countdownIntervalId = null;
       }
     },
   },
@@ -326,12 +240,6 @@ export default {
     protocol() {
       this.startPolling();
     },
-    selectedTimeout() {
-      this.startPolling();
-    },
-    selectedPhase() {
-      this.fetchData();
-    },
   },
   beforeUnmount() {
     this.stopPolling();
@@ -340,7 +248,33 @@ export default {
 </script>
 
 <style scoped>
-.hidden {
-  display: none;
+
+
+.form-inline-media {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+
+.info-screen {
+  background-color: var(--display-bgc);
+  border: 2px solid #000000;
+  border-radius: 4px;
+  padding: 15px;
+  font-family: 'Moscow2025', monospace;
+}
+
+.info-line {
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
+.lcd-1 {
+  color: var(--display-txt-1);
+}
+
+.lcd-2 {
+  color: var(--display-txt-2);
 }
 </style>
