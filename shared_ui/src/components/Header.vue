@@ -9,7 +9,7 @@
         <li v-for="item in menu" :key="item.id">
           <router-link
             :to="item.path"
-            :class="{ active: $route.path === item.path }"
+            :class="{ active: $route.path.startsWith(item.path) }"
           >
             {{ item.title }}
           </router-link>
@@ -24,7 +24,7 @@ import { ref } from "vue";
 
 // Массив меню
 const menu = ref([
-  { id: 1, title: "Главная", path: "/" },
+  { id: 1, title: "Главная", path: "/home" },
   { id: 2, title: "Поток", path: "/tools_potok" },
   { id: 3, title: "Swarco", path: "/tools_swarco" },
   { id: 4, title: "Peek", path: "/tools_peek" },

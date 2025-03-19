@@ -1,8 +1,8 @@
 <template>
   <div class="container">
-    <h2 class="title margin-bottom">Управление контроллером</h2>
+    <h2 class="title margin-bottom">Расширенное управление дорожным контроллером</h2>
     <div class="form-inline">
-      <div class="form-column">
+      <div class="form-column mt">
         <input
           type="text text-small"
           class="text text-mid"
@@ -45,7 +45,6 @@
       <div class="form-column info-screen width-100">
         <!-- Блок для Swarco -->
         <div v-if="protocol === 'Swarco'">
-          <p>{{ protocol }}</p>
           <div class="info-line width-100">
             <span class="lcd-1">Текущий режим: </span>
             <span class="lcd-2">{{ stateTestResponse?.current_mode || "Нет данных" }}</span>
@@ -67,7 +66,7 @@
           </div>
 
           <div class="info-line width-100">
-            <span class="lcd-1">FIXED TIME STATUS: </span>
+            <span class="lcd-1">FIXED TIME: </span>
             <span class="lcd-2">{{ stateTestResponse?.fixed_time_status || "Нет данных" }}</span>
           </div>
 
@@ -259,15 +258,21 @@ export default {
 
 .info-screen {
   background-color: var(--display-bgc);
-  border: 2px solid #000000;
-  border-radius: 4px;
+  border: 3px solid var(--body);
+  border-radius: 6px;
   padding: 15px;
   font-family: 'Moscow2025', monospace;
+  box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.2);
+  overflow: auto;
 }
 
 .info-line {
   margin-bottom: 10px;
   font-size: 16px;
+}
+
+.mt {
+  margin: 1px 2px 8px 0px;
 }
 
 .lcd-1 {
