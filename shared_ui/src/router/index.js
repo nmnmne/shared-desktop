@@ -34,10 +34,9 @@ router.beforeEach((to, from, next) => {
     console.log('Последний сохраненный маршрут:', lastRoute);
 
     if (lastRoute) {
-      // Перенаправляем на последний сохраненный маршрут
-      next({ path: lastRoute.path, query: lastRoute.query, params: lastRoute.params });
+      // Используем именованный маршрут для передачи params
+      next({ name: 'tools_all', params: lastRoute.params, query: lastRoute.query });
     } else {
-      // Если сохраненного маршрута нет, перенаправляем на /home
       next('/home');
     }
   } else {
