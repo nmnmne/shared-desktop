@@ -139,6 +139,12 @@ body {
   box-sizing: border-box;
 }
 
+.container-large {
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .form-inline {
   display: flex;
   align-items: center;
@@ -219,6 +225,12 @@ button {
   &:read-only {
     background-color: var(--text-bcg-5);
   }
+}
+
+.tools {
+  padding: 20px;
+  flex-grow: 1;
+  max-width: 700px;
 }
 
 .custom-file-input::file-selector-button {

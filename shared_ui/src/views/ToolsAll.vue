@@ -2,7 +2,7 @@
   <div class="tools-page">
     <SidebarAll :toolsData="toolsData" @change-tool="handleChangeTool" />
     <div class="tools">
-      <div v-if="!toolName">Выберите инструмент</div>
+      <div v-if="!toolName"><h2 class="title">Выберите инструмент</h2></div>
       <div v-else>
         <ApiDir v-if="toolName === 'api_dir'" />
         <PhaseControl v-if="toolName === 'phase_control'" />
@@ -38,11 +38,6 @@ const handleChangeTool = (tool) => {
 </script>
 
 <style scoped>
-
-.tools {
-  padding: 20px;
-  flex-grow: 1;
-}
 
 .tools-page {
   display: flex;
