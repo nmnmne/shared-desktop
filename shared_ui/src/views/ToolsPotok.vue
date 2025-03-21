@@ -2,7 +2,7 @@
   <div class="tools-page">
     <SidebarPotok :toolsData="toolsData" @change-tool="handleChangeTool" />
     <div class="tools">
-      <div v-if="!toolName">Выберите инструмент</div>
+      <div v-if="!toolName"><h2 class="title">Выберите инструмент</h2></div>
       <div v-else>
         <RestartWebAdmin v-if="toolName === 'restart_web_admin'" /> 
         <DtPotok v-if="toolName === 'dt_potok'" /> 
@@ -35,10 +35,7 @@ const handleChangeTool = (tool) => {
 </script>
 
 <style scoped>
-.tools {
-  padding: 20px;
-  flex-grow: 1;
-}
+
 .tools-page {
   display: flex;
   height: 100%;

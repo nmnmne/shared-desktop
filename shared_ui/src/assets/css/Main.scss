@@ -1,120 +1,3 @@
-/* Темная тема */
-body.dark-theme {
-  --header-bcg: #1d1c26;
-  --body-bcg: #2c2d33;
-  --footer-bcg: #4abe48;
-  --sidebar-bgc: #25282f;
-  --sidebar-border: #000000;
-  --theme: #424242;
-  --active-hdr: #424242;
-  --active-sbr: #5d738b;
-  --line-hdr: #b4b4b4;
-  --info: #2c2d33;
-
-  --text1: #ececec;
-  --text2: #b1b1b1;
-  --text3: #d3d3d3;
-  --text4: #cdcdcd;
-  --text5: #000000;
-  --text6: #9ea1a7;
-  --text7: #b6bbc6;
-
-  --border: #000000;
-  --text-bcg: #42454a;
-  --text-bcg-1: #3e4954;
-  --text-bcg-2: #1d1e1f;
-  --text-bcg-3: #131313;
-  --text-bcg-4: #666b6f;
-  --text-bcg-5: #4a4f53;
-  --text-bcg-6: #949da4;
-
-  --button-1-bgc: #3c3a46;
-  --button-2-bgc: #524f69;
-  --button-3-bgc: #9c95d2;
-  --button-4-bgc: #b22c2c;
-
-  --green1: #8cafb2;
-  --hover-hdr: #2e2f47;
-  --hover-sbr: #535f74;
-  --yellow: #997a40;
-
-  --display-bgc:#181720;
-  --display-txt-1:#637261;
-  --display-txt-2:#99af97;
-
-  --gray-50: #1e1e1e;
-  --gray-100: #ececec;
-  --gray-200: #e3e3e3;
-  --gray-500: #9b9b9b;
-  --gray-750: #2f2f2f;
-  --gray-950: #0d0d0d;
-  --gray-960: #090909;
-  --gray-970: #050505;
-  --gray-980: #020202;
-
-  --body: rgb(64, 63, 70);
-  --modal: rgba(0, 0, 0, 0.5);
-  --modal-sdw: rgba(0, 0, 0, 0.5);
-}
-
-/* Светлая тема */
-body {
-  --header-bcg: #4879be;
-  --body-bcg: #ebebeb;
-  --footer-bcg: #4abe48;
-  --sidebar-bgc: #8ea4b8;
-  --sidebar-border: #407fbb;
-  --theme: #8ea4b8;
-  --active-hdr: #546992;
-  --active-sbr: #68839d;
-  --line-hdr: #b4b4b4;
-  --info: #ebebeb;
-
-  --text1: #ececec;
-  --text2: #30435dd7;
-  --text3: #142440;
-  --text4: #ffffff;
-  --text5: #d5d5d5;
-  --text6: #676d78;
-  --text7: #14223d;
-
-  --border: #0e1a49c8;
-  --text-bcg: #e1e4ec;
-  --text-bcg-1: #c9c9c9;
-  --text-bcg-2: #f5f5f5;
-  --text-bcg-3: #fbfbfb;
-  --text-bcg-4: #fbfbfb;
-  --text-bcg-5: #d7dde2;
-  --text-bcg-6: #ffffff;
-
-  --button-1-bgc: #3b75ab;
-  --button-2-bgc: #407fbb;
-  --button-3-bgc: #407fbb;
-  --button-4-bgc: #b22c2c;
-
-  --green1: #7ac483;
-  --hover-hdr: #94a9cd;
-  --hover-sbr: #5e81bd;
-  --yellow: #d8b163;
-
-  --display-bgc:#e0ecdd;
-  --display-txt-1:#4e634a;
-  --display-txt-2:#3b1f06;
-
-  --gray-50: #1e1e1e;
-  --gray-100: #ececec;
-  --gray-200: #e3e3e3;
-  --gray-500: #9b9b9b;
-  --gray-750: #2f2f2f;
-  --gray-950: #0d0d0d;
-  --gray-960: #090909;
-  --gray-970: #050505;
-  --gray-980: #020202;
-
-  --body: #d3d7df;
-  --modal: rgba(93, 139, 151, 0.667);
-  --modal-sdw: rgba(210, 206, 171, 0.429);
-}
 
 * {
   margin: 0;
@@ -124,6 +7,7 @@ body {
 }
 
 body {
+  overflow-y: scroll;
   width: 100%;
   min-height: 100vh;
   background: var(--body);
@@ -132,9 +16,18 @@ body {
   margin: 0;
   padding: 0;
 }
-
+body::-webkit-scrollbar {
+  width: 0;
+  background: transparent;
+}
 .container {
   max-width: 700px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.container-large {
+  max-width: 100%;
   width: 100%;
   box-sizing: border-box;
 }
@@ -219,6 +112,12 @@ button {
   &:read-only {
     background-color: var(--text-bcg-5);
   }
+}
+
+.tools {
+  padding: 20px;
+  flex-grow: 1;
+  max-width: 700px;
 }
 
 .custom-file-input::file-selector-button {
@@ -452,6 +351,10 @@ input[type="radio"] {
   }
 }
 
+.mt {
+  margin: 1px 2px 8px 0px;
+}
+
 .function-item {
   display: flex;
   align-items: center;
@@ -511,6 +414,23 @@ input[type="radio"] {
   }
 }
 
+.rules-name {
+  font-size: 14px;
+  padding: 4px 17px;
+  background-color: var(--rule-name);
+  color: var(--text1);
+  margin-bottom: 12px;
+  border-radius: 9px;
+}
+
+.notes {
+  font-size: 14px;
+  padding: 4px 17px;
+  background-color: var(--notes);
+  color: var(--text1);
+  border-radius: 9px;
+}
+
 .form-inline-media {
   display: flex;
   align-items: center;
@@ -531,6 +451,14 @@ input[type="radio"] {
   width: 100%;
 }
 
+.width-60 {
+  width: 60%;
+}
+
+.width-40 {
+  width: 40%;
+}
+
 .margin-top {
   margin-top: 30px;
 }
@@ -542,13 +470,17 @@ input[type="radio"] {
   .form-inline-media[style*="flex-direction: column"] #search_host {
     width: 99ch;
   }
-  .text-small {
-    width: 100%;
-  }
+  .text-small,
   .text-mid {
     width: 100%;
   }
   .margin-bottom {
     margin-bottom: 39px;
+  }
+  .media-100,
+  .width-60,
+  .width-40 {
+    max-width: 100%;
+    width: 100%;
   }
 }

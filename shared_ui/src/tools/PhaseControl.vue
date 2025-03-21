@@ -100,7 +100,7 @@ export default {
       31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45,
       46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60,
       61, 62, 63, 64, 65],
-      timeoutId: null, // Добавляем timeoutId для debounce
+      timeoutId: null,
     };
   },
   computed: {
@@ -111,10 +111,10 @@ export default {
   methods: {
     handleInput() {
       if (this.timeoutId) {
-        clearTimeout(this.timeoutId); // Сбрасываем предыдущий таймер
+        clearTimeout(this.timeoutId);
       }
       this.timeoutId = setTimeout(() => {
-        this.searchHost(); // Вызываем метод через 1 секунду
+        this.searchHost();
       }, 1000);
     },
     async searchHost() {

@@ -2,7 +2,7 @@
   <div class="tools-page">
     <SidebarSwarco :toolsData="toolsData" @change-tool="handleChangeTool" />
     <div class="tools">
-      <div v-if="!toolName">Выберите инструмент</div>
+      <div v-if="!toolName"><h2 class="title">Выберите инструмент</h2></div>
       <div v-else>
         <SwarcoITC v-if="toolName === 'swarco_itc'" />
         <SwarcoLog v-if="toolName === 'swarco_log'" />
