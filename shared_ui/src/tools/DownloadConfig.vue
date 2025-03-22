@@ -40,7 +40,7 @@
           :disabled="isLoading"
           style="width: 25ch;"
         >
-          {{ isLoading ? 'Ждите...' : 'Скачать конфигурацию' }}
+          {{ isLoading ? 'Ждите...' : 'Скачать конфиг' }}
         </button>
       </div>
 

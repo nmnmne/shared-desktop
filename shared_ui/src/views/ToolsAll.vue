@@ -4,10 +4,10 @@
     <div class="tools">
       <div v-if="!toolName"><h2 class="title">Выберите инструмент</h2></div>
       <div v-else>
-        <ApiDir v-if="toolName === 'api_dir'" />
+        <TrafficLights v-if="toolName === 'traffic_lights'" />
         <PhaseControl v-if="toolName === 'phase_control'" />
         <SGCount v-if="toolName === 'sg_count'" />
-        <ManageController v-if="toolName === 'manage_controller'" />
+        <TrafficPro v-if="toolName === 'traffic_pro'" />
       </div>
 
     </div>
@@ -18,10 +18,10 @@
 import { ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import SidebarAll from "@/components/SidebarAll.vue";
-import ApiDir from "@/tools/ApiDir.vue";
+import TrafficLights from "@/tools/TrafficLights.vue";
 import PhaseControl from "@/tools/PhaseControl.vue"
 import SGCount from "@/tools/SGCount.vue"
-import ManageController from "@/tools/ManageController.vue"
+import TrafficPro from "@/tools/TrafficPro.vue"
 
 const route = useRoute();
 const router = useRouter();

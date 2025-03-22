@@ -47,10 +47,10 @@
 
     <div class="margin-top">
       <span @click="toggleVisibility" style="cursor: pointer; user-select: none; margin: 7px;">
-        {{ isVisible ? 'Скрыть ^' : 'Если не получается по номеру СО >' }}
+        {{ isVisible ? 'Скрыть ^' : 'Показать >' }}
       </span>
 
-      <div :class="{ hidden: !isVisible }">
+      <div style="margin-top: 25px;" :class="{ hidden: !isVisible }">
         <input
           type="text"
           id="ip_address"
