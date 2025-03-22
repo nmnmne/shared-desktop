@@ -21,8 +21,8 @@ import { ref } from "vue";
 const sidebarNav = ref([
   {
     id: 1,
-    title: "API Дирижёр",
-    toolName: "api_dir",
+    title: "Просмотр ДК",
+    toolName: "traffic_lights",
   },
   {
     id: 2,
@@ -32,7 +32,7 @@ const sidebarNav = ref([
   {
     id: 3,
     title: "Управление контроллером",
-    toolName: "manage_controller",
+    toolName: "traffic_pro",
   },
   {
     id: 4,
