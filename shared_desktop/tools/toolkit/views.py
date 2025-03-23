@@ -1,4 +1,5 @@
 from time import process_time_ns
+from typing import Generator
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.views.generic import TemplateView
@@ -38,43 +39,91 @@ class SearchByNumberTrafficLightsAPIVeiw(generics.RetrieveAPIView):
 
 
 class TrafficLightsUpdate(APIView):
+    """
+    Обновляет модель светофорных объектов.
+    SQL, который сбрасывает счетчик авто-инкремента pk:
+    ALTER SEQUENCE toolkit_trafficlightsobjects_id_seq RESTART WITH 1;
+    """
+    # permission_classes = (IsAdminUser,)
+
+    FILENAME = 'List'
+    ALLOWED_FILE_EXT = {'xls', 'xlsx'}
+
+    ID               = 0
+    NUMBER           = 1
+    TYPE_CONTROLLER  = 2
+    ADDRESS          = 3
+    LONGITUDE        = 4
+    LATITUDE         = 5
+    REGION           = 6
+    DESCRIPTION      = 7
+    IP_ADDRESS       = 8
+
+    bad_response = {
+        'result': 'Некорректное имя файла и/или расширение, данные не обновлены',
+        'ok': False
+    }
+    good_response ={
+        'result': 'Данные не обновлены',
+        'ok': True
+    }
+    matches_controllers_to_group = {
+        'Swarco': 1,
+        'Peek': 2,
+        'Поток (P)': 3,
+        'Поток (S)': 4,
+        'Сигнал (STCIP)': 5,
+        'Сигнал (SXTP)': 6,
+        'ДКС': 7,
+        'ДКС (Старт)': 8,
+        'ДКСТ': 9,
+    }
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._request = None
+        self.wb = None
+        self.sheet = None
 
     def post(self, request):
         start_time = time.time()
         logger.debug(request.FILES)
-        file_in_memory = request.FILES['file'].read()
-        wb = openpyxl.load_workbook(filename=BytesIO(file_in_memory))
-        sh = wb.active
+        if not self.check_filename(request.FILES['file'].name):
+            return Response(self.bad_response)
+        self.wb = openpyxl.load_workbook(filename=BytesIO(request.FILES['file'].read()))
+        self.sheet = self.wb.active
 
-        all_obj = []
-        for row_cells in sh.iter_rows():
-            # num_co, addr, ip_addr, decsr, type_controller = row_cells
-            num_co, type_controller, addr, description, ip_addr = row_cells
-
-            num_co, addr, ip_addr, description, type_controller = num_co.value, addr.value, ip_addr.value, \
-                description.value, type_controller.value
-
-            matches_controllers_to_group = {
-                'Swarco': 1,
-                'Peek': 2,
-                'Поток (P)': 3,
-                'Поток (S)': 4,
-                'Сигнал (STCIP)': 5,
-                'Сигнал (SXTP)': 6,
-                'ДКС': 7,
-                'ДКС (Старт)': 8,
-                'ДКСТ': 9,
-            }
-            group = matches_controllers_to_group.get(type_controller, 0)
-
-            all_obj.append((
-                TrafficLightsObjects(number=num_co, adress=addr, description=description,
-                                     ip_adress=ip_addr, type_controller=type_controller, group=group)
-            ))
         TrafficLightsObjects.objects.all().delete()
-        TrafficLightsObjects.objects.bulk_create(all_obj)
-        logger.debug('Время обновления: %s' % (time.time() - start_time))
-        return Response({'result': 'данные обновлены'})
+        TrafficLightsObjects.objects.bulk_create(self.get_model_objects())
+        logger.debug(f'Время обновления: {(time.time() - start_time)}')
+        print(f'Время обновления: {(time.time() - start_time)}')
+        return Response(self.good_response)
+
+    def get_model_objects(self) -> Generator:
+        it = self.sheet.iter_rows()
+        next(it) # Пропустить первую row, которая является шапкой excel таблицы
+        return (
+            TrafficLightsObjects(
+                id=row_cells[self.ID].value,
+                number=row_cells[self.NUMBER].value,
+                address=row_cells[self.ADDRESS].value,
+                description=row_cells[self.DESCRIPTION].value,
+                ip_adress=row_cells[self.IP_ADDRESS].value,
+                type_controller=row_cells[self.TYPE_CONTROLLER].value,
+                group=self.matches_controllers_to_group.get(row_cells[self.TYPE_CONTROLLER].value, 0)
+            )
+            for row_cells in it
+        )
+
+    def check_filename(self, full_filename: str) -> bool:
+        splitter = '.'
+        _full_filename = full_filename.split(splitter)
+        if len(_full_filename) < 2:
+            return False
+        name, _extension = splitter.join(_full_filename[:-1]), _full_filename[-1]
+        if _extension not in self.ALLOWED_FILE_EXT or name != self.FILENAME:
+            return False
+        return True
 
 
 class ControllerManagementAPI(APIView):
@@ -369,6 +418,7 @@ class PeekProcesses(APIView):
 
 
 class ManageControllers(TemplateView):
+    print('ManageControllers')
     template_name = 'toolkit/manage_controllers.html'
     extra_context = {
         'first_row_settings': {
