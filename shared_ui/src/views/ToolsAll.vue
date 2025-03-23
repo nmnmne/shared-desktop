@@ -2,7 +2,9 @@
   <div class="tools-page">
     <SidebarAll :toolsData="toolsData" @change-tool="handleChangeTool" />
     <div class="tools">
-      <div v-if="!toolName"><h2 class="title">Выберите инструмент</h2></div>
+      <div class="container tools-left" v-if="!toolName">
+        <h2 class="title">Выберите инструмент</h2>
+      </div>
       <div v-else>
         <TrafficLights v-if="toolName === 'traffic_lights'" />
         <PhaseControl v-if="toolName === 'phase_control'" />
@@ -43,11 +45,9 @@ const handleChangeTool = (tool) => {
   display: flex;
   height: 100%;
 }
-
 @media (max-width: 900px) {
   .tools-page {
     display: block;
   }
 }
-
 </style>

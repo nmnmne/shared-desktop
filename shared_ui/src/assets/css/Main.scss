@@ -115,9 +115,23 @@ button {
 }
 
 .tools {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+}
+
+.tools-left {
   padding: 20px;
   flex-grow: 1;
+  width: 700px;
   max-width: 700px;
+}
+
+.tools-right {
+  padding: 20px;
+  flex-grow: 1;
 }
 
 .custom-file-input::file-selector-button {

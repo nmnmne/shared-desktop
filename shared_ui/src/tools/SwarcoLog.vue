@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container tools-left">
     <h2 class="title">Расшифровка лог-файла Swarco</h2>
     <div class="form-inline">
       <input type="file" @change="handleFileUpload" class="custom-file-input" />

@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container tools-left">
     <h2 class="title">Работа с Traffic Light Configurator</h2>
       <div class="form-inline">
         <input

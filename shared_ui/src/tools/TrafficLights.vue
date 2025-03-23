@@ -1,6 +1,8 @@
 <template>
-  <div>
-    <p>Скоро...</p>
+  <div class="tools">
+    <div class="container tools-left">
+      <p>Скоро...</p>
+    </div>
   </div>
 </template>
 
