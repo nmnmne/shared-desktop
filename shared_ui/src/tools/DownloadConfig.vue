@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container tools-left">
     <h2 class="title">Скачать конфигурацию Swarco</h2>
 
       <div style="margin-bottom: 5px;" class="form-inline">

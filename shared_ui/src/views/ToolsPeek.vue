@@ -2,7 +2,9 @@
   <div class="tools-page">
     <SidebarPeek :toolsData="toolsData" @change-tool="handleChangeTool" />
     <div class="tools">
-      <div v-if="!toolName"><h2 class="title">Выберите инструмент</h2></div>
+      <div class="container tools-left" v-if="!toolName">
+        <h2 class="title">Выберите инструмент</h2>
+      </div>
       <div v-else>
         <PeekProcesses v-if="toolName === 'peek_processes'" />
       </div>
@@ -37,11 +39,9 @@ const handleChangeTool = (tool) => {
   display: flex;
   height: 100%;
 }
-
 @media (max-width: 900px) {
   .tools-page {
     display: block;
   }
 }
-
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container tools-left">
     <h2 class="title margin-bottom">Управление фазой</h2>
     <div class="form-inline-media">
       <input

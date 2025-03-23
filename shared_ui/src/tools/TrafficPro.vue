@@ -1,5 +1,6 @@
 <template>
-  <div class="container">
+  <div class="tools">
+  <div class="container tools-left">
     <h2 class="title margin-bottom">Расширенное управление дорожным контроллером</h2>
     <div class="form-inline">
       <div class="form-column mt">
@@ -32,14 +33,43 @@
         <input
           type="text"
           class="text text-mid"
-          placeholder="."
+          placeholder="command"
+          v-model="command"
         />
 
         <input
           type="text"
           class="text text-mid"
-          placeholder="."
+          placeholder="options"
+          v-model="options"
         />
+
+        <input
+          type="text"
+          class="text text-mid"
+          placeholder="value"
+          v-model="value"
+        />
+
+        <button
+          class='text'
+          style="background-color: var(--header-bcg);
+          color: var(--text1);"
+          @click="setCommand"
+        >
+          set-command
+        </button>
+        <a
+          :href="'http://' + ip"
+          target="_blank"
+          class='text'
+          style="background-color: var(--header-bcg);
+          color: var(--text1);
+          text-align: center;"
+          v-if="ip"
+        >
+          go-to-web
+        </a>
       </div>
 
       <div class="form-column info-screen width-100">
@@ -240,7 +270,6 @@
 
         </div>
 
-        <!-- Пусто -->
         <div v-else>
           <div class="info-line width-100"><span class="lcd-1">Ожидание ввода данных</span></div>
           <div class="info-line width-100"><pre> </pre></div>
@@ -263,6 +292,22 @@
     </div>
 
   </div>
+  <div class="container tools-right" >
+    <p>Временный блок разработчика</p>
+
+    <div class="response-block" v-if="setCommandRequest">
+      <h3>Запрос на сервер:</h3>
+      <pre>{{ setCommandRequest }}</pre>
+    </div>
+
+    <div class="response-block" v-if="commandResponse">
+      <h3>Ответ от сервера:</h3>
+      <pre>{{ commandResponse }}</pre>
+    </div>
+
+  </div>
+  
+  </div>
 </template>
 
 <script>
@@ -282,6 +327,11 @@ export default {
       intervalId: null,
       statusMessage: "Ожидание данных...",
       lastUpdateTime: "Нет данных",
+      command: "",
+      options: "",
+      value: "",
+      commandResponse: null,
+      setCommandRequest: null,
     };
   },
   computed: {
@@ -290,6 +340,52 @@ export default {
     },
   },
   methods: {
+    async setCommand() {
+      if (!this.ip || !this.type_controller) {
+        console.error("IP и тип контроллера обязательны для выполнения команды.");
+        return;
+      }
+
+      const requestData = {
+        hosts: {
+          [this.ip]: {
+            type_controller: this.type_controller,
+          },
+        },
+      };
+
+      if (this.command) {
+        requestData.hosts[this.ip].command = this.command;
+      }
+      if (this.options) {
+        requestData.hosts[this.ip].options = this.options;
+      }
+      if (this.value) {
+        requestData.hosts[this.ip].value = Number(this.value);
+      }
+      console.log("Отправляемый JSON:", JSON.stringify(requestData, null, 2));
+      this.setCommandRequest = requestData
+      try {
+        const url = '/api/v1/traffic-lights/set-command';
+        const response = await axios.post(url, requestData, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        this.commandResponse = response.data;
+        console.log("Команда успешно отправлена:", response.data);
+      } catch (error) {
+        console.error("Ошибка при отправке команды:", error);
+        if (error.response) {
+          console.error("Данные ошибки:", error.response.data);
+          console.error("Статус ошибки:", error.response.status);
+          this.commandResponse = error.response.data;
+        } else {
+          this.commandResponse = { error: "Ошибка сети или сервера" };
+        }
+      }
+    },
     handleInput() {
       this.clearFields();
 
@@ -302,7 +398,6 @@ export default {
       }, 1500);
     },
     clearFields() {
-      // Очищаем поля
       this.ip = "";
       this.type_controller = "";
       this.address = "";
@@ -320,7 +415,7 @@ export default {
           hosts: [searchValue],
         };
 
-        console.log("Отправляемый JSON:", JSON.stringify(requestData, null, 2));
+        // console.log("Отправляемый JSON:", JSON.stringify(requestData, null, 2));
 
         const response = await axios.post(url, requestData, {
           headers: {
@@ -359,7 +454,7 @@ export default {
           },
         };
 
-        console.log("Отправляемый JSON:", JSON.stringify(requestData, null, 2));
+        // console.log("Отправляемый JSON:", JSON.stringify(requestData, null, 2));
 
         const response = await axios.post(url, requestData, {
           headers: {
@@ -367,8 +462,8 @@ export default {
           },
         });
 
-        console.log("RES", response.data[this.ip].response.data);
-        console.log("PRTC", this.type_controller);
+        // console.log("RES", response.data[this.ip].response.data);
+        // console.log("PRTC", this.type_controller);
 
         if (this.type_controller === "Swarco") {
           this.stateResponse = response.data[this.ip].response.data;
@@ -456,6 +551,18 @@ export default {
 
 .description {
   margin-top: 20px ;
+}
+
+
+
+
+/* Временное */
+.response-block {
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 4px;
 }
 
 </style>

@@ -2,7 +2,9 @@
   <div class="tools-page">
     <SidebarSwarco :toolsData="toolsData" @change-tool="handleChangeTool" />
     <div class="tools">
-      <div v-if="!toolName"><h2 class="title">Выберите инструмент</h2></div>
+      <div class="container tools-left" v-if="!toolName">
+        <h2 class="title">Выберите инструмент</h2>
+      </div>
       <div v-else>
         <SwarcoITC v-if="toolName === 'swarco_itc'" />
         <SwarcoLog v-if="toolName === 'swarco_log'" />
@@ -37,20 +39,13 @@ const handleChangeTool = (tool) => {
 
 <style scoped>
 
-.tools {
-  padding: 20px;
-  flex-grow: 1;
-}
-
 .tools-page {
   display: flex;
   height: 100%;
 }
-
 @media (max-width: 900px) {
   .tools-page {
     display: block;
   }
 }
-
 </style>

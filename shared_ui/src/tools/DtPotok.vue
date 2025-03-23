@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container tools-left">
     <h2 class="title">Генерация условий вызова или продления</h2>
     <div class="form-inline">
       <input 

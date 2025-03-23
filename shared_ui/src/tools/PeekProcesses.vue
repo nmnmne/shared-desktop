@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container tools-left">
     <h2 class="title">Расчет процессов Peek</h2>
     <label for="processCount">Выберите количество процессов: </label>
     <select v-model="selectedProcessCount" id="processCount">

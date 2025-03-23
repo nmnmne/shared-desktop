@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container tools-left">
     <h2 class="title">Подсчет длительности направлений Excel</h2>
   
     <div class="info">

@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container tools-left">
     <h2 class="title">Сброс сессий пользователя 'itc'</h2>
     <div class="form-inline">
       <div>
