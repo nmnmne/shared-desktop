@@ -1,6 +1,8 @@
 <template>
-  <div class="container">
+  <div class="tools">
+  <div class="container tools-left">
     <h2 class="title">Здесь заголовок</h2>
+  </div>
   </div>
 </template>
 
