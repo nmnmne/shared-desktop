@@ -478,6 +478,11 @@ input[type="radio"] {
 }
 
 @media (max-width: 500px) {
+  .tools-left {
+    padding: 20px;
+    flex-grow: 1;
+    width: 100%;
+  }
   .form-inline-media {
     flex-direction: column;
   }
