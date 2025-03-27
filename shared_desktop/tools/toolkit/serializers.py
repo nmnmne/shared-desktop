@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from tools.toolkit.models import ControllerManagement, TrafficLightsObjects
+from .models import ControllerManagement, TrafficLightsObjects
 
 
 class ControllerHostsSerializer(serializers.ModelSerializer):
@@ -18,4 +18,4 @@ class TrafficLightsSerializerAllFields(serializers.ModelSerializer):
 class BaseTrafficLightsSerializer(serializers.ModelSerializer):
     class Meta:
         model = TrafficLightsObjects
-        fields = ('number', 'description', 'type_controller', 'ip_adress', 'adress')
+        fields = ('number', 'description', 'type_controller', 'ip_adress', 'address')

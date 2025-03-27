@@ -23,12 +23,12 @@ class TrafficLightsObjects(models.Model):
     type_controller = models.CharField(max_length=20)
     group = models.IntegerField(default=0)
     ip_adress = models.CharField(max_length=20, null=True)
-    adress = models.TextField(blank=True, null=True)
+    address = models.TextField(blank=True, null=True)
     time_create = models.DateTimeField(auto_now_add=True)
     time_update = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f'{self.number} {self.adress} {self.type_controller}'
+        return f'{self.number} {self.address} {self.type_controller}'
 
 
 class TelegrammUsers(models.Model):
