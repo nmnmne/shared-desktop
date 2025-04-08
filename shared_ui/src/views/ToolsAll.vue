@@ -10,6 +10,7 @@
         <PhaseControl v-if="toolName === 'phase_control'" />
         <SGCount v-if="toolName === 'sg_count'" />
         <TrafficPro v-if="toolName === 'traffic_pro'" />
+        <GetFirmware v-if="toolName === 'get_firmware'" />
       </div>
 
     </div>
@@ -24,6 +25,7 @@ import TrafficLights from "@/tools/TrafficLights.vue";
 import PhaseControl from "@/tools/PhaseControl.vue"
 import SGCount from "@/tools/SGCount.vue"
 import TrafficPro from "@/tools/TrafficPro.vue"
+import GetFirmware from "@/tools/GetFirmware.vue"
 
 const route = useRoute();
 const router = useRouter();
