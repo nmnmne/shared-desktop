@@ -37,7 +37,7 @@ const sidebarNav = ref([
   {
     id: 4,
     title: "Версия прошивки контроллера",
-    toolName: "",
+    toolName: "get_firmware",
   },
   {
     id: 5,
