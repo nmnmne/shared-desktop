@@ -7,6 +7,10 @@ docker-compose -f docker-compose-frontend.yml down
 docker pull inteonmteca/shared_ui:latest
 docker-compose -f docker-compose-frontend.yml up -d
 
+docker image ls
+docker rmi c7cfd4952c79 de977e057e03
+docker image prune
+
 ## Recommended IDE Setup
 
 [VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).

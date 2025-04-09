@@ -42,7 +42,7 @@ const sidebarNav = ref([
   {
     id: 5,
     title: "Калькулятор времени цикла",
-    toolName: "",
+    toolName: "calculate_cycle",
   },
   {
     id: 6,
@@ -54,7 +54,6 @@ const sidebarNav = ref([
     title: "Работа с паспортом",
     toolName: "",
   },
-
 ]);
 
 const activeTool = ref(null);
@@ -69,4 +68,3 @@ const setTool = (item) => {
 <style lang="scss" scoped>
 @use "@/assets/css/Sidebar.scss" as *;
 </style>
-

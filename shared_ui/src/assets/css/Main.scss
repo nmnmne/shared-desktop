@@ -126,8 +126,8 @@ button {
 .tools-left {
   padding: 20px;
   flex-grow: 1;
-  width: 700px;
-  max-width: 700px;
+  width: 777px;
+  max-width: 777px;
 }
 
 .tools-right {
@@ -287,6 +287,27 @@ button {
     color: var(--gray-500);
   }
 }
+
+._text_ {
+  font-size: 23px;
+  color: var(--text6);
+  background-color: var(--body-bgc);
+  padding: 1px 2px 2px 12px;
+  border: 0px;
+  border-radius: 6px;
+  width: 100%;
+  font-family: monospace;
+  
+  &:focus {
+    border-color: var(--gray-600); 
+    outline: none; 
+  }
+  
+  &::placeholder {
+    color: var(--gray-500);
+  }
+}
+
 
 .width-12-chars {
   width: 12ch;
@@ -476,6 +497,18 @@ input[type="radio"] {
 
 .margin-top {
   margin-top: 30px;
+}
+
+.mb4 {
+  margin-bottom: 4px;
+}
+
+.mb10 {
+  margin-bottom: 10px;
+}
+
+.mr {
+  margin-right: 10px;
 }
 
 @media (max-width: 500px) {

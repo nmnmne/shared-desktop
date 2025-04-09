@@ -38,7 +38,7 @@
       </div>
 
       <div v-if="responseData" class="response-container">
-        <pre>{{ responseData.version }}</pre>
+        <pre class="response">{{ responseData.version }}</pre>
       </div>
       
       <div v-if="errorMessage" class="error-message">
@@ -165,5 +165,9 @@ export default {
   padding: 6px;
   color: #d32f2f;
   border-radius: 4px;
+}
+
+.response {
+  font-size: 17px;
 }
 </style>
