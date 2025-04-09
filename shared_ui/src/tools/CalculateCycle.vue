@@ -30,6 +30,8 @@
               :placeholder="`Время фазы`"
               style="width: 13ch; color: #999;"
               @input="calculateShifts"
+              min="0"
+              max="300"
             >
           </div>
           
@@ -41,6 +43,8 @@
               :placeholder="`Промтакт`"
               style="width: 11ch; color: #999;"
               @input="calculateShifts"
+              min="0"
+              max="300"
             >
           </div>
           
