@@ -12,6 +12,7 @@
         <TrafficPro v-if="toolName === 'traffic_pro'" />
         <GetFirmware v-if="toolName === 'get_firmware'" />
         <CalculateCycle v-if="toolName === 'calculate_cycle'" />
+        <TabDtGen v-if="toolName === 'tab_dt_gen'" />
       </div>
 
     </div>
@@ -28,6 +29,7 @@ import SGCount from "@/tools/SGCount.vue"
 import TrafficPro from "@/tools/TrafficPro.vue"
 import GetFirmware from "@/tools/GetFirmware.vue"
 import CalculateCycle from "@/tools/CalculateCycle.vue"
+import TabDtGen from "@/tools/TabDtGen.vue"
 
 const route = useRoute();
 const router = useRouter();
