@@ -247,7 +247,7 @@ button {
 
 .text {
   background-color: var(--text-bcg); 
-  border: 1px solid var(--border);    
+  border: 1px solid var(--text2);    
   font-size: 23px;
   color: var(--text6);
   padding: 2px 2px 2px 12px;
@@ -256,13 +256,13 @@ button {
   font-family: monospace;
 
   &:focus {
-    border-color: var(--text-bcg-4);
+    border-color: var(--text5);
     outline: none;
     background-color: var(--text-bcg-4);
   }
 
   &:not(:placeholder-shown) {
-    background-color: var(--text-bcg-4);
+    background-color: var(--text-bcg);
   }
 
   &::placeholder {

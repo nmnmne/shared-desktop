@@ -137,3 +137,20 @@ class SaveConflictsTXT(models.Model):
     class Meta:
         verbose_name = "SaveConflictsTXT"
         verbose_name_plural = "SaveConflictsTXT"
+
+
+class Detector(models.Model):
+    name = models.CharField(max_length=20)
+    io_board_input = models.CharField(max_length=10)
+    ki_pd_2 = models.CharField(max_length=5, default='-')
+    ki_pd_16 = models.CharField(max_length=10)
+    direction_number = models.IntegerField()
+    offset = models.CharField(max_length=5, default='-')
+    request = models.CharField(max_length=5)
+    gap = models.CharField(max_length=5)
+    ts_count = models.CharField(max_length=5, default='+')
+    unoccupied_alarm = models.CharField(max_length=10)
+    occupied_alarm = models.CharField(max_length=10)
+
+    def __str__(self):
+        return self.name

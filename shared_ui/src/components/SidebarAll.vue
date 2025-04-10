@@ -54,6 +54,11 @@ const sidebarNav = ref([
     title: "Работа с паспортом",
     toolName: "",
   },
+  {
+    id: 8,
+    title: "Генератор таблицы детекторов",
+    toolName: "tab_dt_gen",
+  },
 ]);
 
 const activeTool = ref(null);

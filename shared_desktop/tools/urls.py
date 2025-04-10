@@ -12,6 +12,7 @@ from . import (
 )
 from .openpyxl import OpenpyxlAPIView
 from .swarco_log import SwarcoLogView
+from .tab_dt_gen import GenerateDetectorTable
 from .toolkit.views import (
     ControllerManagementAPI,
     DownloadConfig,
@@ -77,6 +78,7 @@ urlpatterns = [
     path('swarco_log_api/', SwarcoLogView.as_view(), name='api_swarco_log'),
     path('get_firmware/', get_firmware.get_firmware, name='get_firmware'),
     path('get_firmware_api/', get_firmware.get_firmware_api, name='get_firmware_api'),
+    path('generate-detector-table/', GenerateDetectorTable.as_view(), name='generate-detector-table'),
 
     path("manage_controllers/", ManageControllers.as_view(), name='manage_controllers'),
     path("download_config/", DownloadConfig.as_view(), name='download_config'),
