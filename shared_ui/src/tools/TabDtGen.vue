@@ -9,20 +9,22 @@
 
             <div class="format-block">
               <p><strong>Формат ввода:</strong></p>
-              <pre> </pre>
+
               <ul>
                 <li>Вводите только <strong>последний детектор</strong> для каждого направления</li>
-                <li>Разделяйте детекторы запятыми или переносами строк</li>
+                <li>Допустимые детекторы <strong>TVP, D, DO</strong></li>
+                <li>Разделяйте детекторы <strong>запятыми</strong> или <strong>переносами строк</strong></li>
               </ul>
             </div>
 
             <div class="examples-block">
               <pre> </pre>
-              <p><strong>Примеры ввода:</strong></p>
+              <p><strong>Пример ввода:</strong></p>
               <div class="example">
-                <pre> </pre>
+
                 <pre>TVP3.10, D1.5, D2.10, DO2.2</pre>
-                <p>Будет сгенерировано:</p>
+                <pre> </pre>
+                <p><strong>Будет сгенерировано:</strong></p>
                 <ul>
                   <li>10 кнопок ТВП 3 направления</li>
                   <li>5 детекторов 1 направления</li>
