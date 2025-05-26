@@ -27,6 +27,7 @@ from .toolkit.views import (
     ConflictsAndStages, PeekProcesses
 )
 from .toolkit.routers import router_controller_managemet
+from .controller_preset import PresetListCreateView, PresetDetailView
 
 
 app_name = "tools"
@@ -94,4 +95,8 @@ urlpatterns = [
     path("api/v1/potok-tlc/", PotokTrafficLightsConfiguratorAPI.as_view()),
     path("api/v1/peek-processes/", PeekProcesses.as_view()),
     path("api/v1/", include(router_controller_managemet.urls)),
+
+
+    path('api/presets/', PresetListCreateView.as_view(), name='preset-list'),
+    path('api/presets/<int:pk>/', PresetDetailView.as_view(), name='preset-detail'),
 ]

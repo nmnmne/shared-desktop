@@ -1,4 +1,5 @@
 """tools models configuration."""
+import json
 
 from django.db import models
 from django.utils import timezone
@@ -152,5 +153,14 @@ class Detector(models.Model):
     unoccupied_alarm = models.CharField(max_length=10)
     occupied_alarm = models.CharField(max_length=10)
 
+    def __str__(self):
+        return self.name
+
+
+class ControllerPreset(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    controllers_data = models.JSONField(default=list)
+    
     def __str__(self):
         return self.name
