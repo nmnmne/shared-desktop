@@ -3,6 +3,30 @@
     <div class="container tools-left">
       <h2 class="title margin-bottom">Расширенное управление дорожным контроллером</h2>
       
+      <!-- Кнопка для показа/скрытия -->
+      <div class='mb10'>
+        <a class='preset_' href="#" @click.prevent="showSelect = !showSelect">
+          {{ showSelect ? 'Скрыть выбор пресета' : 'Показать выбор пресета' }}
+        </a>
+      </div>
+
+      <div v-show="showSelect">
+        <!-- Выбор пресета -->
+        <div>
+          <select class="preset" v-model="selectedPresetId" @change="loadPreset">
+            <option disabled value="">Выберите пресет</option>
+            <option v-for="preset in presets" :key="preset.id" :value="preset.id">
+              {{ preset.name }}
+            </option>
+          </select>
+
+        <!-- Сохранение пресета -->
+
+          <input class="preset" v-model="presetName" placeholder="Название сохроняемого" />
+          <button class="preset" @click="savePreset">Сохранить как пресет</button>
+        </div>
+      </div>
+  
       <!-- Выбор количества контроллеров -->
       <div class="form-inline">
         <div class="form-column mt">
@@ -281,7 +305,7 @@
               <div class="info-line width-100"><pre> </pre></div>
               <div class="info-line width-100"><pre> </pre></div>
               <div class="info-line width-100"><pre> </pre></div>
-              <div class="info-line width-100"><pre>Этот инструмент пока на стадии разработки! </pre></div>
+              <div class="info-line width-100"><pre> </pre></div>
             </div>
           </div>
         </div>
@@ -316,16 +340,22 @@
 
 <script>
 import axios from 'axios';
+import { serverIPs } from '@/assets/js/config';
 
 export default {
-  name: "TrafficProMulti",
+  name: "TrafficPro",
   data() {
     return {
+      showSelect: false,
+      IP: serverIPs[0],
       cloneCount: 1,
       typesControllers: ["Swarco", "Поток (S)", "Поток (P)", "Peek"],
       controllers: [this.createNewController()],
       timeoutIds: {},
-      activeControllerIndex: 0
+      activeControllerIndex: 0,
+      presets: [],
+      selectedPresetId: '',
+      presetName: '',
     };
   },
   computed: {
@@ -344,7 +374,55 @@ export default {
       }
     }
   },
+  mounted() {
+      this.fetchPresets();
+    },
   methods: {
+    fetchPresets() {
+      const baseURL = this.IP.startsWith('http') ? this.IP : `http://${this.IP}`;
+      fetch(`${baseURL}/api/presets/`)
+        .then(res => res.json())
+        .then(data => {
+          this.presets = data;
+        })
+        .catch(err => {
+          console.error("Ошибка при получении пресетов:", err);
+        });
+    },
+    loadPreset() {
+      if (!this.selectedPresetId) return;
+      const baseURL = this.IP.startsWith('http') ? this.IP : `http://${this.IP}`;
+      fetch(`${baseURL}/api/presets/${this.selectedPresetId}/`)
+        .then(res => res.json())
+        .then(data => {
+          this.controllers = data.controllers_data;
+          this.presetName = data.name;
+        });
+    },
+    savePreset() {
+      if (!this.presetName) {
+        alert("Введите название пресета");
+        return;
+      }
+
+      const payload = {
+        name: this.presetName,
+        controllers_data: this.controllers,
+      };
+
+      const baseURL = this.IP.startsWith('http') ? this.IP : `http://${this.IP}`;
+
+      axios.post(`${baseURL}/api/presets/`, payload, {
+        headers: { 'Content-Type': 'application/json' },
+      })
+        .then(() => {
+          alert("Пресет сохранён");
+          this.fetchPresets();
+        })
+        .catch((error) => {
+          console.error("Ошибка при сохранении пресета:", error);
+        });
+    },
     createNewController() {
       return {
         searchValue: "",
@@ -367,7 +445,7 @@ export default {
     async setCommand(index) {
       this.activeControllerIndex = index;
       const controller = this.controllers[index];
-      
+
       if (!controller.ip || !controller.type_controller) {
         console.error(`IP и тип контроллера ${index + 1} обязательны для выполнения команды.`);
         return;
@@ -387,7 +465,7 @@ export default {
       if (controller.source) requestData.hosts[controller.ip].source = controller.source;
 
       controller.setCommandRequest = requestData;
-      
+
       try {
         const url = '/api/v1/traffic-lights/set-command';
         const response = await axios.post(url, requestData, {
@@ -409,7 +487,7 @@ export default {
       if (this.timeoutIds[index]) {
         clearTimeout(this.timeoutIds[index]);
       }
-      
+
       this.timeoutIds[index] = setTimeout(() => {
         this.searchHost(index);
       }, 1500);
@@ -443,7 +521,7 @@ export default {
         controller.type_controller = response.data.results?.[0]?.[searchValue]?.db_records?.[0]?.type_controller || "";
         controller.address = response.data.results?.[0]?.[searchValue]?.db_records?.[0]?.address || "";
         controller.description = response.data.results?.[0]?.[searchValue]?.db_records?.[0]?.description || "";
-        
+
         this.startPolling(index);
       } catch (error) {
         console.error(`Ошибка при поиске контроллера ${index + 1}:`, error);
@@ -473,18 +551,7 @@ export default {
           },
         });
 
-        if (controller.type_controller === "Swarco") {
-          controller.stateResponse = response.data[controller.ip].response.data;
-        } else if (controller.type_controller === "Peek") {
-          controller.stateResponse = response.data[controller.ip].response.data;
-        } else if (controller.type_controller === "Поток (P)") {
-          controller.stateResponse = response.data[controller.ip].response.data;
-        } else if (controller.type_controller === "Поток (S)") {
-          controller.stateResponse = response.data[controller.ip].response.data;
-        } else {
-          controller.stateResponse = null;
-        }
-
+        controller.stateResponse = response.data[controller.ip].response.data;
         controller.statusMessage = "Данные успешно получены";
         controller.lastUpdateTime = new Date().toLocaleTimeString();
       } catch (error) {
@@ -576,4 +643,31 @@ export default {
 .width-100 {
   width: 100%;
 }
+
+.preset {
+  border: 1px solid var(--border);    
+  font-size: 14px;
+  padding: 3px 14px 2px 5px;
+  border-radius: 6px;
+  font-family: monospace;
+  resize: vertical;
+  height: auto;
+  margin: 5px 5px 15px 5px;
+  
+  &:focus {
+    border-color: var(--gray-600); 
+    outline: none; 
+  }
+  
+  &::placeholder {
+    color: var(--gray-500);
+  }
+}
+
+.preset_ {
+  font-size: 17px;
+  color: var(--text6);
+  width: 100%;
+}
+
 </style>
