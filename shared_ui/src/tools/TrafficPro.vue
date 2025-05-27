@@ -469,7 +469,7 @@ export default {
       };
     },
     
-    async fetchCommandsAndOptions(index) {
+    async fetchCommandsAndOptions(index, isPresetLoad = false) {
       const controller = this.controllers[index];
       if (!controller.type_controller) return;
       
@@ -479,12 +479,21 @@ export default {
         
         if (response.data && response.data[controller.type_controller]) {
           controller.availableCommands = response.data[controller.type_controller].services_entity;
-          // Сбрасываем текущую команду при смене типа контроллера
-          controller.command = "";
-          controller.options = "";
-          controller.value = "";
-          controller.source = "";
-          controller.currentCommand = null;
+          
+          // Не сбрасываем значения при загрузке пресета
+          if (!isPresetLoad) {
+            // Сбрасываем только при обычной смене типа контроллера
+            controller.command = "";
+            controller.options = "";
+            controller.value = "";
+            controller.source = "";
+            controller.currentCommand = null;
+          } else {
+            // При загрузке пресета обновляем currentCommand если команда уже выбрана
+            if (controller.command && controller.availableCommands[controller.command]) {
+              controller.currentCommand = controller.availableCommands[controller.command];
+            }
+          }
         }
       } catch (error) {
         console.error(`Ошибка при получении команд для контроллера ${index + 1}:`, error);
@@ -573,51 +582,61 @@ export default {
         });
     },
 
-    loadPreset() {
+    async loadPreset() {
       if (!this.selectedPresetId) return;
       const baseURL = this.IP.startsWith('http') ? this.IP : `http://${this.IP}`;
-      fetch(`${baseURL}/api/presets/${this.selectedPresetId}/`)
-        .then(res => res.json())
-        .then(data => {
-          // Устанавливаем количество контроллеров из сохраненных данных
-          this.cloneCount = data.clone_count || data.controllers_data?.length || 1;
-          
-          // Создаем новые контроллеры, подгружая только нужные поля
-          this.controllers = (data.controllers_data || []).map(controllerData => {
-            const newController = this.createNewController();
-            return {
-              ...newController,
-              searchValue: controllerData.searchValue || '',
-              ip: controllerData.ip || '',
-              type_controller: controllerData.type_controller || '',
-              command: controllerData.command || '',
-              options: controllerData.options || '',
-              value: controllerData.value || '',
-              source: controllerData.source || ''
-            };
-          });
-          
-          // Добавляем недостающие контроллеры, если нужно
-          while (this.controllers.length < this.cloneCount) {
-            this.controllers.push(this.createNewController());
-          }
-          
-          this.presetName = data.name;
-          
-          // Загружаем команды для контроллеров с указанным типом
-          this.controllers.forEach((controller, index) => {
-            if (controller.type_controller) {
-              this.fetchCommandsAndOptions(index);
-              this.startPolling(index);
-            }
-          });
-        })
-        .catch(error => {
-          console.error("Ошибка при загрузке пресета:", error);
-          this.cloneCount = 1;
-          this.controllers = [this.createNewController()];
+      
+      try {
+        const response = await fetch(`${baseURL}/api/presets/${this.selectedPresetId}/`);
+        const data = await response.json();
+
+        // Устанавливаем количество контроллеров
+        this.cloneCount = data.clone_count || data.controllers_data?.length || 1;
+        
+        // Восстанавливаем данные из пресета
+        this.controllers = (data.controllers_data || []).map(controllerData => {
+          const newController = this.createNewController();
+          return {
+            ...newController,
+            searchValue: controllerData.searchValue || '',
+            ip: controllerData.ip || '',
+            type_controller: controllerData.type_controller || '',
+            command: controllerData.command || '',
+            options: controllerData.options || '',
+            value: controllerData.value || '',
+            source: controllerData.source || ''
+          };
         });
+        
+        // Добавляем недостающие контроллеры
+        while (this.controllers.length < this.cloneCount) {
+          this.controllers.push(this.createNewController());
+        }
+        
+        this.presetName = data.name;
+        
+        // Загружаем команды для каждого контроллера с флагом isPresetLoad
+        await Promise.all(this.controllers.map((controller, index) => {
+          if (controller.type_controller) {
+            return this.fetchCommandsAndOptions(index, true); // true - флаг загрузки пресета
+          }
+          return Promise.resolve();
+        }));
+        
+        // Запускаем polling для контроллеров с IP
+        this.controllers.forEach((controller, index) => {
+          if (controller.ip) {
+            this.startPolling(index);
+          }
+        });
+        
+      } catch (error) {
+        console.error("Ошибка при загрузке пресета:", error);
+        this.cloneCount = 1;
+        this.controllers = [this.createNewController()];
+      }
     },
+
     handleInput(index) {
       this.clearFields(index);
 
