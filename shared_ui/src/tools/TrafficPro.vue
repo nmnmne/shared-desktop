@@ -20,8 +20,7 @@
             </option>
           </select>
 
-        <!-- Сохранение пресета -->
-
+          <!-- Сохранение пресета -->
           <input class="preset" v-model="presetName" placeholder="Название сохроняемого" />
           <button class="preset" @click="savePreset">Сохранить как пресет</button>
         </div>
@@ -62,37 +61,103 @@
             <select
               class="select text-mid"
               v-model="controller.type_controller"
+              @change="fetchCommandsAndOptions(index)"
             >
-              <option value="">Тип ДК</option>
+              <option disabled value="">Тип ДК</option>
               <option v-for="type in typesControllers" :key="type" :value="type">{{ type }}</option>
             </select>
 
+            <!-- Команда -->
+            <select
+              class="select text-mid"
+              v-model="controller.command"
+              @change="updateCommandFields(index)"
+              v-if="controller.availableCommands"
+            >
+              <option disabled value="">Выберите команду</option>
+              <option 
+                v-for="(cmd, cmdName) in controller.availableCommands" 
+                :key="cmdName" 
+                :value="cmdName"
+              >
+                {{ cmd.command_name }}
+              </option>
+            </select>
             <input
               type="text"
               class="text text-mid"
               :placeholder="'command ' + (index + 1)"
               v-model="controller.command"
+              v-else
             />
 
+            <!-- Опции -->
+            <select
+              class="select text-mid"
+              v-model="controller.options"
+              v-if="controller.currentCommand && controller.currentCommand.options && controller.currentCommand.options.length > 0"
+            >
+              <option disabled value="">Выберите опцию</option>
+              <option 
+                v-for="option in controller.currentCommand.options" 
+                :key="option" 
+                :value="option"
+              >
+                {{ option }}
+              </option>
+            </select>
             <input
               type="text"
               class="text text-mid"
               :placeholder="'options ' + (index + 1)"
               v-model="controller.options"
+              v-else
             />
 
+            <!-- Значение -->
+            <select
+              class="select text-mid"
+              v-model="controller.value"
+              v-if="controller.currentCommand && controller.currentCommand.values_range && controller.currentCommand.values_range.length > 0"
+            >
+              <option disabled value="">Выберите значение</option>
+              <option 
+                v-for="val in controller.currentCommand.values_range" 
+                :key="val" 
+                :value="val"
+              >
+                {{ val }}
+              </option>
+            </select>
             <input
               type="text"
               class="text text-mid"
               :placeholder="'value ' + (index + 1)"
               v-model="controller.value"
+              v-else
             />
 
+            <!-- Источник -->
+            <select
+              class="select text-mid"
+              v-model="controller.source"
+              v-if="controller.currentCommand && controller.currentCommand.sources && controller.currentCommand.sources.length > 0"
+            >
+              <option disabled value="">Выберите источник</option>
+              <option 
+                v-for="src in controller.currentCommand.sources" 
+                :key="src" 
+                :value="src"
+              >
+                {{ src }}
+              </option>
+            </select>
             <input
               type="text"
               class="text text-mid"
               :placeholder="'source ' + (index + 1)"
               v-model="controller.source"
+              v-else
             />
 
             <button
@@ -375,9 +440,86 @@ export default {
     }
   },
   mounted() {
-      this.fetchPresets();
-    },
+    this.fetchPresets();
+  },
   methods: {
+    createNewController() {
+      return {
+        searchValue: "",
+        ip: "",
+        type_controller: "",
+        address: "",
+        description: "",
+        stateResponse: null,
+        intervalId: null,
+        command: "",
+        options: "",
+        value: "",
+        source: "",
+        commandResponse: null,
+        setCommandRequest: null,
+        statusMessage: "Ожидание данных...",
+        lastUpdateTime: "Нет данных",
+        availableCommands: null,
+        currentCommand: null
+      };
+    },
+    
+    async fetchCommandsAndOptions(index) {
+      const controller = this.controllers[index];
+      if (!controller.type_controller) return;
+      
+      try {
+        const url = '/api/v1/traffic-lights/commands-and-options';
+        const response = await axios.get(url);
+        
+        if (response.data && response.data[controller.type_controller]) {
+          controller.availableCommands = response.data[controller.type_controller].services_entity;
+          // Сбрасываем текущую команду при смене типа контроллера
+          controller.command = "";
+          controller.options = "";
+          controller.value = "";
+          controller.source = "";
+          controller.currentCommand = null;
+        }
+      } catch (error) {
+        console.error(`Ошибка при получении команд для контроллера ${index + 1}:`, error);
+        controller.availableCommands = null;
+        controller.currentCommand = null;
+      }
+    },
+    
+    updateCommandFields(index, commandName = null) {
+      const controller = this.controllers[index];
+      if (!commandName) commandName = controller.command;
+      
+      if (controller.availableCommands && controller.availableCommands[commandName]) {
+        controller.currentCommand = controller.availableCommands[commandName];
+        
+        // Сбрасываем предыдущие значения
+        controller.options = "";
+        controller.value = "";
+        controller.source = "";
+        
+        // Устанавливаем значения по умолчанию
+        if (controller.currentCommand.default_source) {
+          controller.source = controller.currentCommand.default_source;
+        }
+        
+        // Если есть только одно значение в диапазоне, устанавливаем его
+        if (controller.currentCommand.values_range && controller.currentCommand.values_range.length === 1) {
+          controller.value = controller.currentCommand.values_range[0];
+        }
+        
+        // Если есть только одна опция, устанавливаем ее
+        if (controller.currentCommand.options && controller.currentCommand.options.length === 1) {
+          controller.options = controller.currentCommand.options[0];
+        }
+      } else {
+        controller.currentCommand = null;
+      }
+    },
+
     fetchPresets() {
       const baseURL = this.IP.startsWith('http') ? this.IP : `http://${this.IP}`;
       fetch(`${baseURL}/api/presets/`)
@@ -389,6 +531,7 @@ export default {
           console.error("Ошибка при получении пресетов:", err);
         });
     },
+
     loadPreset() {
       if (!this.selectedPresetId) return;
       const baseURL = this.IP.startsWith('http') ? this.IP : `http://${this.IP}`;
@@ -397,8 +540,15 @@ export default {
         .then(data => {
           this.controllers = data.controllers_data;
           this.presetName = data.name;
+          // Загружаем команды для каждого контроллера после загрузки пресета
+          this.controllers.forEach((controller, index) => {
+            if (controller.type_controller) {
+              this.fetchCommandsAndOptions(index);
+            }
+          });
         });
     },
+
     savePreset() {
       if (!this.presetName) {
         alert("Введите название пресета");
@@ -423,25 +573,63 @@ export default {
           console.error("Ошибка при сохранении пресета:", error);
         });
     },
-    createNewController() {
-      return {
-        searchValue: "",
-        ip: "",
-        type_controller: "",
-        address: "",
-        description: "",
-        stateResponse: null,
-        intervalId: null,
-        command: "",
-        options: "",
-        value: "",
-        source: "",
-        commandResponse: null,
-        setCommandRequest: null,
-        statusMessage: "Ожидание данных...",
-        lastUpdateTime: "Нет данных"
-      };
+
+    handleInput(index) {
+      this.clearFields(index);
+
+      if (this.timeoutIds[index]) {
+        clearTimeout(this.timeoutIds[index]);
+      }
+
+      this.timeoutIds[index] = setTimeout(() => {
+        this.searchHost(index);
+      }, 1500);
     },
+
+    clearFields(index) {
+      const controller = this.controllers[index];
+      controller.ip = "";
+      controller.type_controller = "";
+      controller.address = "";
+      controller.description = "";
+      controller.stateResponse = null;
+      controller.availableCommands = null;
+      controller.currentCommand = null;
+    },
+
+    async searchHost(index) {
+      const controller = this.controllers[index];
+      const searchValue = controller.searchValue.trim();
+      if (!searchValue) return;
+
+      try {
+        const url = '/api/v1/traffic-lights/properties';
+        const requestData = {
+          hosts: [searchValue],
+        };
+
+        const response = await axios.post(url, requestData, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        controller.ip = response.data.results?.[0]?.[searchValue]?.db_records?.[0]?.ip_adress || "";
+        controller.type_controller = response.data.results?.[0]?.[searchValue]?.db_records?.[0]?.type_controller || "";
+        controller.address = response.data.results?.[0]?.[searchValue]?.db_records?.[0]?.address || "";
+        controller.description = response.data.results?.[0]?.[searchValue]?.db_records?.[0]?.description || "";
+
+        // Загружаем команды после установки типа контроллера
+        if (controller.type_controller) {
+          this.fetchCommandsAndOptions(index);
+        }
+
+        this.startPolling(index);
+      } catch (error) {
+        console.error(`Ошибка при поиске контроллера ${index + 1}:`, error);
+      }
+    },
+
     async setCommand(index) {
       this.activeControllerIndex = index;
       const controller = this.controllers[index];
@@ -481,52 +669,7 @@ export default {
         controller.commandResponse = error.response?.data || { error: "Ошибка сети или сервера" };
       }
     },
-    handleInput(index) {
-      this.clearFields(index);
 
-      if (this.timeoutIds[index]) {
-        clearTimeout(this.timeoutIds[index]);
-      }
-
-      this.timeoutIds[index] = setTimeout(() => {
-        this.searchHost(index);
-      }, 1500);
-    },
-    clearFields(index) {
-      const controller = this.controllers[index];
-      controller.ip = "";
-      controller.type_controller = "";
-      controller.address = "";
-      controller.description = "";
-      controller.stateResponse = null;
-    },
-    async searchHost(index) {
-      const controller = this.controllers[index];
-      const searchValue = controller.searchValue.trim();
-      if (!searchValue) return;
-
-      try {
-        const url = '/api/v1/traffic-lights/properties';
-        const requestData = {
-          hosts: [searchValue],
-        };
-
-        const response = await axios.post(url, requestData, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        controller.ip = response.data.results?.[0]?.[searchValue]?.db_records?.[0]?.ip_adress || "";
-        controller.type_controller = response.data.results?.[0]?.[searchValue]?.db_records?.[0]?.type_controller || "";
-        controller.address = response.data.results?.[0]?.[searchValue]?.db_records?.[0]?.address || "";
-        controller.description = response.data.results?.[0]?.[searchValue]?.db_records?.[0]?.description || "";
-
-        this.startPolling(index);
-      } catch (error) {
-        console.error(`Ошибка при поиске контроллера ${index + 1}:`, error);
-      }
-    },
     async fetchStateTest(index) {
       const controller = this.controllers[index];
       if (!controller.ip || !controller.type_controller) {
@@ -560,12 +703,15 @@ export default {
         controller.stateResponse = null;
       }
     },
+
     startPolling(index) {
       this.stopPolling(index);
+      this.fetchStateTest(index); // Сразу делаем первый запрос
       this.controllers[index].intervalId = setInterval(() => {
         this.fetchStateTest(index);
       }, 2000);
     },
+
     stopPolling(index) {
       if (this.controllers[index].intervalId) {
         clearInterval(this.controllers[index].intervalId);
@@ -580,7 +726,6 @@ export default {
   },
 };
 </script>
-
 <style scoped>
 .controller-group {
   margin-bottom: 20px;
