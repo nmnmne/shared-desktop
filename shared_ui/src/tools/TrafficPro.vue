@@ -13,7 +13,7 @@
       <div v-show="showSelect">
         <!-- Выбор пресета -->
         <div>
-          <select class="preset" v-model="selectedPresetId" @change="loadPreset">
+          <select class="preset" style="padding: 2px 10px 1px 2px" v-model="selectedPresetId" @change="loadPreset">
             <option disabled value="">Выберите пресет</option>
             <option v-for="preset in presets" :key="preset.id" :value="preset.id">
               {{ preset.name }}
@@ -29,7 +29,7 @@
   
       <!-- Выбор количества контроллеров -->
       <div class="form-inline">
-        <div class="form-column mt">
+        <div class="form-column mt controller-group">
           <select v-model="cloneCount" class="select text-mid">
             <option v-for="n in 16" :value="n" :key="n">
               {{ n }} {{ n === 1 ? 'контроллер' : n >= 2 && n <= 4 ? 'контроллера' : 'контроллеров' }}
@@ -653,15 +653,6 @@ export default {
   resize: vertical;
   height: auto;
   margin: 5px 5px 15px 5px;
-  
-  &:focus {
-    border-color: var(--gray-600); 
-    outline: none; 
-  }
-  
-  &::placeholder {
-    color: var(--gray-500);
-  }
 }
 
 .preset_ {
