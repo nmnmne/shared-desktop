@@ -430,14 +430,18 @@ export default {
   },
   watch: {
     cloneCount(newVal, oldVal) {
-      if (newVal > oldVal) {
-        for (let i = oldVal; i < newVal; i++) {
+    if (newVal > oldVal) {
+      // Добавляем новые контроллеры
+      for (let i = oldVal; i < newVal; i++) {
+        if (!this.controllers[i]) {
           this.controllers.push(this.createNewController());
         }
-      } else {
-        this.controllers = this.controllers.slice(0, newVal);
       }
+    } else {
+      // Удаляем лишние контроллеры (но сохраняем данные)
+      this.controllers = this.controllers.slice(0, newVal);
     }
+  },
   },
   mounted() {
     this.fetchPresets();
@@ -532,32 +536,27 @@ export default {
         });
     },
 
-    loadPreset() {
-      if (!this.selectedPresetId) return;
-      const baseURL = this.IP.startsWith('http') ? this.IP : `http://${this.IP}`;
-      fetch(`${baseURL}/api/presets/${this.selectedPresetId}/`)
-        .then(res => res.json())
-        .then(data => {
-          this.controllers = data.controllers_data;
-          this.presetName = data.name;
-          // Загружаем команды для каждого контроллера после загрузки пресета
-          this.controllers.forEach((controller, index) => {
-            if (controller.type_controller) {
-              this.fetchCommandsAndOptions(index);
-            }
-          });
-        });
-    },
-
     savePreset() {
       if (!this.presetName) {
         alert("Введите название пресета");
         return;
       }
 
+      // Создаем упрощенный массив контроллеров только с нужными полями
+      const simplifiedControllers = this.controllers.slice(0, this.cloneCount).map(controller => ({
+        searchValue: controller.searchValue,
+        ip: controller.ip,
+        type_controller: controller.type_controller,
+        command: controller.command,
+        options: controller.options,
+        value: controller.value,
+        source: controller.source
+      }));
+
       const payload = {
         name: this.presetName,
-        controllers_data: this.controllers,
+        controllers_data: simplifiedControllers,
+        clone_count: this.cloneCount
       };
 
       const baseURL = this.IP.startsWith('http') ? this.IP : `http://${this.IP}`;
@@ -574,6 +573,51 @@ export default {
         });
     },
 
+    loadPreset() {
+      if (!this.selectedPresetId) return;
+      const baseURL = this.IP.startsWith('http') ? this.IP : `http://${this.IP}`;
+      fetch(`${baseURL}/api/presets/${this.selectedPresetId}/`)
+        .then(res => res.json())
+        .then(data => {
+          // Устанавливаем количество контроллеров из сохраненных данных
+          this.cloneCount = data.clone_count || data.controllers_data?.length || 1;
+          
+          // Создаем новые контроллеры, подгружая только нужные поля
+          this.controllers = (data.controllers_data || []).map(controllerData => {
+            const newController = this.createNewController();
+            return {
+              ...newController,
+              searchValue: controllerData.searchValue || '',
+              ip: controllerData.ip || '',
+              type_controller: controllerData.type_controller || '',
+              command: controllerData.command || '',
+              options: controllerData.options || '',
+              value: controllerData.value || '',
+              source: controllerData.source || ''
+            };
+          });
+          
+          // Добавляем недостающие контроллеры, если нужно
+          while (this.controllers.length < this.cloneCount) {
+            this.controllers.push(this.createNewController());
+          }
+          
+          this.presetName = data.name;
+          
+          // Загружаем команды для контроллеров с указанным типом
+          this.controllers.forEach((controller, index) => {
+            if (controller.type_controller) {
+              this.fetchCommandsAndOptions(index);
+              this.startPolling(index);
+            }
+          });
+        })
+        .catch(error => {
+          console.error("Ошибка при загрузке пресета:", error);
+          this.cloneCount = 1;
+          this.controllers = [this.createNewController()];
+        });
+    },
     handleInput(index) {
       this.clearFields(index);
 
