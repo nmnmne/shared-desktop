@@ -46,7 +46,7 @@
             <input
               type="text"
               class="text text-mid"
-              :placeholder="'Номер СО ' + (index + 1)"
+              placeholder="Номер СО"
               v-model="controller.searchValue"
               @input="handleInput(index)"
             />
@@ -55,7 +55,8 @@
               type="text"
               class="text text-mid"
               v-model="controller.ip"
-              :placeholder="'IP-адрес ' + (index + 1)"
+              @change="checkAndStartPolling(index)"
+              :placeholder="'IP-адрес' "
             />
 
             <select
@@ -86,7 +87,7 @@
             <input
               type="text"
               class="text text-mid"
-              :placeholder="'command ' + (index + 1)"
+              placeholder="Команда"
               v-model="controller.command"
               v-else
             />
@@ -109,7 +110,7 @@
             <input
               type="text"
               class="text text-mid"
-              :placeholder="'options ' + (index + 1)"
+              placeholder="Опции"
               v-model="controller.options"
               v-else
             />
@@ -132,7 +133,7 @@
             <input
               type="text"
               class="text text-mid"
-              :placeholder="'value ' + (index + 1)"
+              placeholder="Значение"
               v-model="controller.value"
               v-else
             />
@@ -155,7 +156,7 @@
             <input
               type="text"
               class="text text-mid"
-              :placeholder="'source ' + (index + 1)"
+              placeholder="Источник"
               v-model="controller.source"
               v-else
             />
@@ -165,7 +166,7 @@
               style="background-color: var(--header-bcg); color: var(--text1);"
               @click="setCommand(index)"
             >
-              set-command {{ index + 1 }}
+              Отправить
             </button>
             
             <a
@@ -175,7 +176,7 @@
               style="background-color: var(--header-bcg); color: var(--text1); text-align: center;"
               v-if="controller.ip"
             >
-              go-to-web {{ index + 1 }}
+              Открыть-web
             </a>
           </div>
 
@@ -468,8 +469,18 @@ export default {
         currentCommand: null
       };
     },
-    
+
+    checkAndStartPolling(index) {
+      const controller = this.controllers[index];
+      if (controller.ip && controller.type_controller) {
+        this.startPolling(index);
+      } else {
+        this.stopPolling(index);
+      }
+    },
+
     async fetchCommandsAndOptions(index, isPresetLoad = false) {
+      this.checkAndStartPolling(index);
       const controller = this.controllers[index];
       if (!controller.type_controller) return;
       
@@ -624,10 +635,8 @@ export default {
         }));
         
         // Запускаем polling для контроллеров с IP
-        this.controllers.forEach((controller, index) => {
-          if (controller.ip) {
-            this.startPolling(index);
-          }
+        this.controllers.forEach((_, index) => {
+          this.checkAndStartPolling(index);
         });
         
       } catch (error) {
@@ -638,15 +647,16 @@ export default {
     },
 
     handleInput(index) {
-      this.clearFields(index);
-
       if (this.timeoutIds[index]) {
         clearTimeout(this.timeoutIds[index]);
       }
 
-      this.timeoutIds[index] = setTimeout(() => {
-        this.searchHost(index);
-      }, 1500);
+      if (this.controllers[index].searchValue.trim()) {
+        this.timeoutIds[index] = setTimeout(() => {
+          this.searchHost(index);
+        }, 1500);
+      }
+      // Убрали else, так как очистка полей больше не останавливает polling
     },
 
     clearFields(index) {
@@ -687,7 +697,7 @@ export default {
           this.fetchCommandsAndOptions(index);
         }
 
-        this.startPolling(index);
+        this.checkAndStartPolling(index);
       } catch (error) {
         console.error(`Ошибка при поиске контроллера ${index + 1}:`, error);
       }
@@ -789,6 +799,7 @@ export default {
   },
 };
 </script>
+
 <style scoped>
 .controller-group {
   margin-bottom: 20px;

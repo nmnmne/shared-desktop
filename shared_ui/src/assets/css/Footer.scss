@@ -57,9 +57,27 @@
 }
 
 .old-site-link {
-  color: var(--text3);
+  color: var(--text6);
   text-decoration: none;
   transition: color 0.3s;
+
+  &:hover {
+    color: var(--active-hdr);
+  }
+}
+
+.admin-link {
+  color: var(--text4);
+  border-radius: 7px;
+  background-color: var(--theme);
+  padding: 3px 13px;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+
+  label {
+    margin: 2px 12px 2px 2px;
+  }
 
   &:hover {
     color: var(--active-hdr);
