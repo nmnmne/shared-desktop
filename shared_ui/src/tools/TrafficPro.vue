@@ -1,39 +1,43 @@
 <template>
   <div class="tools">
-    <div class="container tools-left">
+    <div class="tools-left">
       <h2 class="title margin-bottom">Расширенное управление дорожным контроллером</h2>
-      
-      <!-- Кнопка для показа/скрытия -->
-      <div class='mb10'>
-        <a class='preset_' href="#" @click.prevent="showSelect = !showSelect">
-          {{ showSelect ? 'Скрыть выбор пресета' : 'Показать выбор пресета' }}
-        </a>
-      </div>
 
-      <div v-show="showSelect">
-        <!-- Выбор пресета -->
-        <div>
-          <select class="preset" style="padding: 2px 10px 1px 2px" v-model="selectedPresetId" @change="loadPreset">
-            <option disabled value="">Выберите пресет</option>
-            <option v-for="preset in presets" :key="preset.id" :value="preset.id">
-              {{ preset.name }}
-            </option>
-          </select>
-
-          <!-- Сохранение пресета -->
-          <input class="preset" v-model="presetName" placeholder="Название сохроняемого" />
-          <button class="preset" @click="savePreset">Сохранить как пресет</button>
-        </div>
-      </div>
-  
-      <!-- Выбор количества контроллеров -->
       <div class="form-inline">
-        <div class="form-column mt controller-group">
-          <select v-model="cloneCount" class="select text-mid">
-            <option v-for="n in 16" :value="n" :key="n">
-              {{ n }} {{ n === 1 ? 'контроллер' : n >= 2 && n <= 4 ? 'контроллера' : 'контроллеров' }}
-            </option>
-          </select>
+        <!-- Выбор количества контроллеров -->
+        <div class="form-inline">
+          <div class="form-column mt controller-group">
+            <select v-model="cloneCount" class="select text-mid">
+              <option v-for="n in 16" :value="n" :key="n">
+                {{ n }} {{ n === 1 ? 'контроллер' : n >= 2 && n <= 4 ? 'контроллера' : 'контроллеров' }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="preset-group">
+          <!-- Кнопка для показа/скрытия -->
+          <div class='mb10'>
+            <a class='preset_' href="#" @click.prevent="showSelect = !showSelect">
+              {{ showSelect ? '' : 'Показать пресеты >' }}
+            </a>
+          </div>
+
+          <div v-show="showSelect">
+            <!-- Выбор пресета -->
+            <div>
+              <select class="preset" style="padding: 2px 10px 1px 2px" v-model="selectedPresetId" @change="loadPreset">
+                <option disabled value="">Выберите пресет</option>
+                <option v-for="preset in presets" :key="preset.id" :value="preset.id">
+                  {{ preset.name }}
+                </option>
+              </select>
+
+              <!-- Сохранение пресета -->
+              <input class="preset" v-model="presetName" placeholder="Название сохроняемого" />
+              <button class="preset" @click="savePreset">Сохранить как пресет</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -388,7 +392,7 @@
       </div>
     </div>
 
-    <div class="container tools-right">
+    <div class="tools-right">
       <p>Временный блок разработчика</p>
 
       <div class="response-block" v-if="activeController.setCommandRequest">
@@ -811,6 +815,18 @@ export default {
   background-color: var(--text-bcg-7);
 }
 
+.preset-group {
+  margin-bottom: 20px;
+  padding: 4px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: var(--text-bcg-7);
+  width: 100%;
+  height: 66px;
+  display: flex;
+  align-items: center;
+}
+
 .controller-group h3 {
   margin-top: 0;
   color: #333;
@@ -856,8 +872,8 @@ export default {
 .response-block {
   margin-top: 20px;
   padding: 10px;
-  background-color: #f5f5f5;
-  border: 1px solid #ddd;
+  background-color: var(--info-3);
+  border: 1px solid var(--border-2);
   border-radius: 4px;
 }
 
@@ -868,18 +884,23 @@ export default {
 .preset {
   border: 1px solid var(--border);    
   font-size: 14px;
-  padding: 3px 14px 2px 5px;
+  padding: 3px 5px 2px 5px;
   border-radius: 6px;
   font-family: monospace;
   resize: vertical;
   height: auto;
-  margin: 5px 5px 15px 5px;
+  margin: 0px 0px 0px 4px;
 }
 
 .preset_ {
   font-size: 17px;
-  color: var(--text6);
+  color: var(--text8);
+  height: 66px;
+  display: flex;
+  align-items: center;
+  margin: 10px 0px 0px 2px;
   width: 100%;
+  text-decoration: none;
 }
 
 </style>
