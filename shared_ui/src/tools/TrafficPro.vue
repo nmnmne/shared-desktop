@@ -722,7 +722,9 @@ export default {
 
       if (controller.command) requestData.hosts[controller.ip].command = controller.command;
       if (controller.options) requestData.hosts[controller.ip].options = controller.options;
-      if (controller.value) requestData.hosts[controller.ip].value = Number(controller.value);
+      if (controller.value != null && controller.value !== '') {
+        requestData.hosts[controller.ip].value = Number(controller.value);
+      }
       if (controller.source) requestData.hosts[controller.ip].source = controller.source;
 
       controller.setCommandRequest = requestData;
