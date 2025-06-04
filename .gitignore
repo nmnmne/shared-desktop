@@ -121,6 +121,7 @@ celerybeat.pid
 shared_desktop/data_hosts.json
 shared_desktop/data_hosts_after_queryset.json
 shared_desktop/controller_management.json
+shared_desktop/table_groups_new.json
 
 # Environments
 .env
