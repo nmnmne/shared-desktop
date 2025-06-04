@@ -6,10 +6,10 @@
         <h2 class="title">Выберите инструмент</h2>
       </div>
       <div v-else>
-        <TrafficLights v-if="toolName === 'traffic_lights'" />
+        <ApiDir v-if="toolName === 'api_dir'" />
         <PhaseControl v-if="toolName === 'phase_control'" />
         <SGCount v-if="toolName === 'sg_count'" />
-        <TrafficPro v-if="toolName === 'traffic_pro'" />
+        <TrafficLights v-if="toolName === 'traffic_lights'" />
         <GetFirmware v-if="toolName === 'get_firmware'" />
         <CalculateCycle v-if="toolName === 'calculate_cycle'" />
         <TabDtGen v-if="toolName === 'tab_dt_gen'" />
@@ -23,10 +23,10 @@
 import { ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import SidebarAll from "@/components/SidebarAll.vue";
-import TrafficLights from "@/tools/TrafficLights.vue";
+import ApiDir from "@/tools/ApiDir.vue";
 import PhaseControl from "@/tools/PhaseControl.vue"
 import SGCount from "@/tools/SGCount.vue"
-import TrafficPro from "@/tools/TrafficPro.vue"
+import TrafficLights from "@/tools/TrafficLights.vue"
 import GetFirmware from "@/tools/GetFirmware.vue"
 import CalculateCycle from "@/tools/CalculateCycle.vue"
 import TabDtGen from "@/tools/TabDtGen.vue"

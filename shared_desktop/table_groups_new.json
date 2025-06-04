@@ -1,0 +1,283 @@
+{
+    "1": {
+        "type_group": "Транспортное",
+        "always_red": false,
+        "stages": [
+            "1.1",
+            "1.7"
+        ],
+        "ok": true,
+        "errors": []
+    },
+    "2": {
+        "type_group": "Транспортное",
+        "always_red": false,
+        "stages": [
+            "1.1",
+            "1.2",
+            "1.6",
+            "1.7"
+        ],
+        "ok": true,
+        "errors": []
+    },
+    "3": {
+        "type_group": "Транспортное",
+        "always_red": false,
+        "stages": [
+            "1.1",
+            "1.7"
+        ],
+        "ok": true,
+        "errors": []
+    },
+    "4": {
+        "type_group": "Транспортное",
+        "always_red": false,
+        "stages": [
+            "1.1",
+            "1.2",
+            "1.4",
+            "1.5",
+            "1.7",
+            "1.8"
+        ],
+        "ok": true,
+        "errors": []
+    },
+    "5": {
+        "type_group": "Поворотное",
+        "always_red": false,
+        "stages": [
+            "1.1",
+            "1.2",
+            "1.4",
+            "1.5",
+            "1.6",
+            "1.7",
+            "1.8"
+        ],
+        "ok": true,
+        "errors": []
+    },
+    "6": {
+        "type_group": "Транспортное",
+        "always_red": false,
+        "stages": [
+            "1.3",
+            "1.4",
+            "1.5",
+            "1.8"
+        ],
+        "ok": true,
+        "errors": []
+    },
+    "7": {
+        "type_group": "Транспортное",
+        "always_red": false,
+        "stages": [
+            "1.3",
+            "1.6"
+        ],
+        "ok": true,
+        "errors": []
+    },
+    "8": {
+        "type_group": "Пешеходное",
+        "always_red": false,
+        "stages": [
+            "1.3"
+        ],
+        "ok": true,
+        "errors": []
+    },
+    "9": {
+        "type_group": "Поворотное",
+        "always_red": false,
+        "stages": [
+            "1.1",
+            "1.2",
+            "1.4",
+            "1.5",
+            "1.6",
+            "1.7",
+            "1.8"
+        ],
+        "ok": true,
+        "errors": []
+    },
+    "10": {
+        "type_group": "Пешеходное",
+        "always_red": false,
+        "stages": [
+            "1.4"
+        ],
+        "ok": true,
+        "errors": []
+    },
+    "11": {
+        "type_group": "Транспортное",
+        "always_red": false,
+        "stages": [
+            "1.3",
+            "1.4",
+            "1.8"
+        ],
+        "ok": true,
+        "errors": []
+    },
+    "12": {
+        "type_group": "Пешеходное",
+        "always_red": false,
+        "stages": [
+            "1.1",
+            "1.2",
+            "1.5",
+            "1.6",
+            "1.7"
+        ],
+        "ok": true,
+        "errors": []
+    },
+    "13": {
+        "type_group": "Транспортное",
+        "always_red": false,
+        "stages": [
+            "2.1"
+        ],
+        "ok": true,
+        "errors": []
+    },
+    "14": {
+        "type_group": "Поворотное",
+        "always_red": false,
+        "stages": [
+            "2.1"
+        ],
+        "ok": true,
+        "errors": []
+    },
+    "15": {
+        "type_group": "Транспортное",
+        "always_red": false,
+        "stages": [
+            "1.1",
+            "1.2",
+            "1.3",
+            "1.5",
+            "1.6",
+            "1.8"
+        ],
+        "ok": true,
+        "errors": []
+    },
+    "16": {
+        "type_group": "Транспортное",
+        "always_red": true,
+        "stages": [
+            "Пост.красное"
+        ],
+        "ok": true,
+        "errors": []
+    },
+    "17": {
+        "type_group": "Транспортное",
+        "always_red": false,
+        "stages": [
+            "1.1",
+            "1.2",
+            "1.6",
+            "1.7"
+        ],
+        "ok": true,
+        "errors": []
+    },
+    "18": {
+        "type_group": "Пешеходное",
+        "always_red": false,
+        "stages": [
+            "1.3"
+        ],
+        "ok": true,
+        "errors": []
+    },
+    "19": {
+        "type_group": "Пешеходное",
+        "always_red": false,
+        "stages": [
+            "2.2"
+        ],
+        "ok": true,
+        "errors": []
+    },
+    "20": {
+        "type_group": "Транспортное",
+        "always_red": false,
+        "stages": [
+            "1.1",
+            "1.2",
+            "1.4",
+            "1.5",
+            "1.6",
+            "1.7",
+            "1.8"
+        ],
+        "ok": true,
+        "errors": []
+    },
+    "21": {
+        "type_group": "Пешеходное",
+        "always_red": false,
+        "stages": [
+            "1.4",
+            "1.5",
+            "1.7"
+        ],
+        "ok": true,
+        "errors": []
+    },
+    "22": {
+        "type_group": "Транспортное",
+        "always_red": false,
+        "stages": [
+            "1.4",
+            "1.5",
+            "1.7",
+            "1.8"
+        ],
+        "ok": true,
+        "errors": []
+    },
+    "23": {
+        "type_group": "Поворотное",
+        "always_red": false,
+        "stages": [
+            "1.1",
+            "1.2",
+            "1.3",
+            "1.6"
+        ],
+        "ok": true,
+        "errors": []
+    },
+    "24": {
+        "type_group": "Пешеходное",
+        "always_red": false,
+        "stages": [
+            "1.3"
+        ],
+        "ok": true,
+        "errors": []
+    },
+    "25": {
+        "type_group": "Транспортное",
+        "always_red": false,
+        "stages": [
+            "1.2",
+            "1.3"
+        ],
+        "ok": true,
+        "errors": []
+    }
+}
+
