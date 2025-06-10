@@ -2,7 +2,7 @@
   <div class="container tools-left">
     <h2 class="title">Расчет процессов Peek</h2>
     <label for="processCount">Выберите количество процессов: </label>
-    <select v-model="selectedProcessCount" id="processCount">
+    <select class="minitext_" v-model="selectedProcessCount" id="processCount">
       <option v-for="n in 4" :key="n" :value="n">{{ n }}</option>
     </select>
     <div class="list-button">

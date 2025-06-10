@@ -22,7 +22,7 @@ const sidebarNav = ref([
   {
     id: 1,
     title: "Просмотр ДК",
-    toolName: "traffic_lights",
+    toolName: "api_dir",
   },
   {
     id: 2,
@@ -32,7 +32,7 @@ const sidebarNav = ref([
   {
     id: 3,
     title: "Управление контроллером",
-    toolName: "traffic_pro",
+    toolName: "traffic_lights",
   },
   {
     id: 4,
