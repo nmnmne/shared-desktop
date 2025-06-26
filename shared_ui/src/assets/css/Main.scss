@@ -135,6 +135,7 @@ button {
 .tools-right {
   padding: 20px;
   flex-grow: 1;
+  width: 800px;
 }
 
 .custom-file-input::file-selector-button {
@@ -234,6 +235,28 @@ button {
   resize: vertical;
   height: auto;
   margin: 2px 0px 5px;
+  
+  &:focus {
+    border-color: var(--gray-600); 
+    outline: none; 
+  }
+  
+  &::placeholder {
+    color: var(--gray-500);
+  }
+}
+
+.mini-text {
+  background-color: var(--text-bcg-2); 
+  border: 0px solid var(--border);    
+  font-size: 14px;
+  color: var(--text7);
+  padding: 2px 2px 2px 6px;
+  border-radius: 6px;
+  width: 100%;
+  font-family: monospace;
+  resize: vertical;
+  height: auto;
   
   &:focus {
     border-color: var(--gray-600); 
@@ -523,7 +546,7 @@ input[type="radio"] {
 }
 
 .margin-top {
-  margin-top: 30px;
+  margin-top: 100px;
 }
 
 .mb4 {

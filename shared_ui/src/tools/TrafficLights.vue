@@ -450,6 +450,7 @@ export default {
   mounted() {
     this.fetchPresets();
   },
+
   methods: {
     createNewController() {
       return {
