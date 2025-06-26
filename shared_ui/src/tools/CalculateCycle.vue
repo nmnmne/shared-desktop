@@ -52,7 +52,7 @@
             <input
               type="text"
               class="_text_"
-              :value="shouldShowShift(phase) ? phase.shift : ''"
+              :value="shouldShowShift(index) ? phase.shift : ''"
               style="width: 10ch"
               readonly
             >
@@ -78,7 +78,7 @@ export default {
   name: "CalculateCycle",
   data() {
     return {
-      phaseCount: 8,
+      phaseCount: 4,
       phases: []
     };
   },
@@ -94,15 +94,20 @@ export default {
   computed: {
     totalCycleTime() {
       if (this.phases.length === 0) return 0;
-      return this.phases[this.phases.length - 1].shift.toFixed(0);
+      return this.phases.reduce((sum, phase) => {
+        const time = phase.time || 0;
+        const promtakta = phase.promtakta !== null ? phase.promtakta : 0;
+        return sum + time + promtakta;
+      }, 0).toFixed(0);
     }
   },
   mounted() {
     this.updatePhases();
   },
   methods: {
-    shouldShowShift(phase) {
-      return phase.time !== null && phase.promtakta !== null;
+    shouldShowShift(index) {
+      // Показываем сдвиг для первой фазы (0) и для фаз, где введено время
+      return index === 0 || this.phases[index].time !== null;
     },
     updatePhases() {
       const currentPhases = [...this.phases];
@@ -112,7 +117,7 @@ export default {
         if (currentPhases[i]) {
           newPhases.push({
             time: currentPhases[i].time,
-            promtakta: currentPhases[i].promtakta,
+            promtakta: currentPhases[i].promtakta !== null ? currentPhases[i].promtakta : null,
             shift: 0
           });
         } else {
@@ -127,12 +132,16 @@ export default {
       this.calculateShifts();
     },
     calculateShifts() {
-      let prevShift = 0;
-      this.phases.forEach(phase => {
-        const time = phase.time || 0;
-        const promtakta = phase.promtakta || 0;
-        phase.shift = prevShift + time + promtakta;
-        prevShift = phase.shift;
+      this.phases.forEach((phase, index) => {
+        if (index === 0) {
+          phase.shift = 0;
+        } else {
+          const prevPhase = this.phases[index - 1];
+          const prevTime = prevPhase.time || 0;
+          // Если промтакт null или undefined, считаем как 0
+          const prevPromtakta = prevPhase.promtakta !== null ? prevPhase.promtakta : 0;
+          phase.shift = this.phases[index - 1].shift + prevTime + prevPromtakta;
+        }
       });
     }
   }
