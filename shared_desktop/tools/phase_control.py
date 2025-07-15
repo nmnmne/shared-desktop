@@ -1,6 +1,4 @@
 import asyncio
-import threading
-import time
 import ipaddress
 
 from pysnmp.hlapi.asyncio import *
