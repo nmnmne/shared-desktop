@@ -8,7 +8,7 @@ from . import (
     api_dir, calculate_cycle, dt_potok, excel_phase_count,
     excel_sg_count_model, phase_control, restart_web_admin,
     views, openpyxl, crcpeek, swarco_log,
-    get_firmware, swarco_ssh
+    get_firmware, swarco_ssh, dt_potok2
 )
 from .openpyxl import OpenpyxlAPIView
 from .swarco_log import SwarcoLogView
@@ -68,6 +68,7 @@ urlpatterns = [
     path('execute_kill/', swarco_ssh.execute_kill, name='execute_kill'),
     path("dt_potok/", dt_potok.dt_potok, name="dt_potok"),
     path('dt_potok_api/', dt_potok.dt_potok_api, name='dt_potok_api'),
+    path('dt_potok2_api/', dt_potok2.dt_potok2_api, name='dt_potok2_api'),
     path('get_phase/', phase_control.get_phase, name='get_phase'),
     path('set_phase/', phase_control.set_phase, name='set_phase'),
 

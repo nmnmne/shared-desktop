@@ -72,13 +72,14 @@ export default {
       for (let server of this.servers) {
         try {
           const res = await axios.post(server, {
-            det_ranges_and_group: this.detRangesAndGroup,
+            user_condition_string: this.detRangesAndGroup,
+            func_name: "ddr"
           });
 
           if (res.data.condition_string) {
             this.response = res.data.condition_string;
             return;
-          } else if (res.data.error) {
+          } else if (res.data.errors) {
             this.error = res.data.error;
             return;
           }
