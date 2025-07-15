@@ -1,8 +1,5 @@
 # shared_desktop
 
-docker build -t shared_desktop .
-docker run --name shared_desktop_container --rm -p 80:80 shared_desktop
-
 python manage.py runserver 0.0.0.0:80
 
 docker build -t inteonmteca/shared_desktop .
