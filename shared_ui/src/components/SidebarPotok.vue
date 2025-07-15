@@ -31,6 +31,11 @@ const sidebarNav = ref([
   },
   {
     id: 3,
+    title: "Генератор строк 2",
+    toolName: "dt_potok2",
+  },
+  {
+    id: 4,
     title: "Работа с конфигуратором",
     toolName: "potok_tlc",
   },

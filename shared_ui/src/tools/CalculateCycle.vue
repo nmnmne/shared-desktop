@@ -149,7 +149,6 @@ export default {
 </script>
 
 <style scoped>
-
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   background: var(--text-bcg) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="24" viewBox="0 0 16 24"><path fill="%23ffffff" d="M8 5l4 5H4z"/><path fill="%23ffffff" d="M8 19l4-5H4z"/></svg>') no-repeat center center;

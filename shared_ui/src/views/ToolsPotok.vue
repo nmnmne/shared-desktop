@@ -8,6 +8,7 @@
       <div v-else>
         <RestartWebAdmin v-if="toolName === 'restart_web_admin'" /> 
         <DtPotok v-if="toolName === 'dt_potok'" /> 
+        <DtPotok2 v-if="toolName === 'dt_potok2'" /> 
         <PotokTLC v-if="toolName === 'potok_tlc'" />
       </div>
     </div>
@@ -20,6 +21,7 @@ import { useRoute, useRouter } from "vue-router";
 import SidebarPotok from "@/components/SidebarPotok.vue";
 import RestartWebAdmin from "@/tools/RestartWebAdmin.vue";
 import DtPotok from "@/tools/DtPotok.vue";
+import DtPotok2 from "@/tools/DtPotok2.vue";
 import PotokTLC from "@/tools/PotokTLC.vue";
 
 const route = useRoute();
