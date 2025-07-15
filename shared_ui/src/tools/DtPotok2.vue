@@ -76,11 +76,11 @@ export default {
             func_name: "ddr"
           });
 
-          if (res.data.condition_string) {
-            this.response = res.data.condition_string;
+          if (res.data.result_condition) {
+            this.response = res.data.result_condition;
             return;
           } else if (res.data.errors) {
-            this.error = res.data.error;
+            this.error = res.data.errors;
             return;
           }
         } catch (err) {
