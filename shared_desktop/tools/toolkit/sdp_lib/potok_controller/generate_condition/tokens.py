@@ -4,7 +4,7 @@ from typing import (
     Pattern
 )
 
-from sdp_lib.potok_controller.generate_condition.constants import MATCHING_OPERATORS, Patterns, ALLOWED_PARENS
+from .constants import MATCHING_OPERATORS, Patterns, ALLOWED_PARENS
 
 
 class Token:

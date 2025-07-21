@@ -1,4 +1,4 @@
-from sdp_lib.potok_controller.generate_condition.constants import ErrMessages
+from .constants import ErrMessages
 
 
 def remove_left_right_spaces(string: str, left=True, right=True) -> str:
