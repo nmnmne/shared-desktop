@@ -3,7 +3,7 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from tools.toolkit.sdp_lib.potok_controller.condition.gen_condition import ConditionMaker
+from tools.toolkit.sdp_lib.potok_controller.generate_condition.gen_condition import ConditionMaker
 
 
 @csrf_exempt
@@ -17,9 +17,8 @@ def dt_potok2_api(request):
         func_name = data["func_name"]
     except (json.JSONDecodeError, KeyError):
         return JsonResponse({"error": "Неверный формат данных."}, status=400)
-
-    maker = ConditionMaker(raw_conditions, func_name)
-    return JsonResponse(maker.process_data_and_build_result_as_dict())
+    condition_maker = ConditionMaker(raw_conditions, func_name)
+    return JsonResponse(condition_maker.make())
 
 
 
