@@ -7,6 +7,8 @@
       </div>
       <div v-else>
         <PeekProcesses v-if="toolName === 'peek_processes'" />
+        <CalcConflicts v-if="toolName === 'calc_conflicts'" />
+        <CRCPeek v-if="toolName === 'crc_peek'" />
       </div>
 
     </div>
@@ -18,6 +20,8 @@ import { ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import SidebarPeek from "@/components/SidebarPeek.vue";
 import PeekProcesses from "@/tools/PeekProcesses.vue";
+import CalcConflicts from "@/tools/CalcConflicts.vue";
+import CRCPeek from "@/tools/CRCPeek.vue";
 
 const route = useRoute();
 const router = useRouter();

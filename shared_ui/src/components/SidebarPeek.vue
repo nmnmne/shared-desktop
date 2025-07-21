@@ -27,12 +27,12 @@ const sidebarNav = ref([
   {
     id: 2,
     title: "Конфликты направлений",
-    toolName: "",
+    toolName: "calc_conflicts",
   },
   {
     id: 3,
     title: "Редактор RAG",
-    toolName: "",
+    toolName: "crc_peek",
   },
 ]);
 

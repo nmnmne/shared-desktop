@@ -34,6 +34,11 @@ const sidebarNav = ref([
     title: "Скачать конфигурацию",
     toolName: "download_config",
   },
+  {
+    id: 4,
+    title: "Конфликты направлений",
+    toolName: "calc_conflicts",
+  },
 ]);
 
 const activeTool = ref(null);

@@ -13,6 +13,8 @@
         <GetFirmware v-if="toolName === 'get_firmware'" />
         <CalculateCycle v-if="toolName === 'calculate_cycle'" />
         <TabDtGen v-if="toolName === 'tab_dt_gen'" />
+        <CalcConflicts v-if="toolName === 'calc_conflicts'" />
+        <Passport v-if="toolName === 'passport'" />
       </div>
 
     </div>
@@ -30,6 +32,8 @@ import TrafficLights from "@/tools/TrafficLights.vue"
 import GetFirmware from "@/tools/GetFirmware.vue"
 import CalculateCycle from "@/tools/CalculateCycle.vue"
 import TabDtGen from "@/tools/TabDtGen.vue"
+import CalcConflicts from "@/tools/CalcConflicts.vue";
+import Passport from "@/tools/Passport.vue";
 
 const route = useRoute();
 const router = useRouter();

@@ -88,6 +88,13 @@ button {
     outline: none;
     border-color: var(--gray-600);
   }
+
+  &:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    border: 0px
+  }
+
 }
 
 .red-button {
@@ -549,6 +556,10 @@ input[type="radio"] {
   margin-top: 100px;
 }
 
+.mt10 {
+  margin-top: 10px;
+}
+
 .mb4 {
   margin-bottom: 4px;
 }
@@ -559,6 +570,19 @@ input[type="radio"] {
 
 .mr {
   margin-right: 10px;
+}
+
+.gap {
+  gap: 7px;
+}
+
+.gap40 {
+  gap: 40px;
+}
+
+.right-align {
+  display: flex;
+  justify-content: flex-end;
 }
 
 @media (max-width: 500px) {
