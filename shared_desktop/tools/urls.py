@@ -76,6 +76,7 @@ urlpatterns = [
     path('api/openpyxl/', OpenpyxlAPIView.as_view(), name='openpyxl-api'),
     path('api/parameter-sets/<str:name>/', OpenpyxlAPIView.as_view(), name='parameter-sets-detail'),
     path('crcpeek/', crcpeek.crcpeek, name='crcpeek'),
+    path('api/crcpeek/', crcpeek.api_crcpeek, name='api_crcpeek'),
     path('swarco_log/', swarco_log.swarco_log, name='swarco_log'),
     path('swarco_log_api/', SwarcoLogView.as_view(), name='api_swarco_log'),
     path('get_firmware/', get_firmware.get_firmware, name='get_firmware'),
