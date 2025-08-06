@@ -6,7 +6,7 @@ COPY package*.json ./
 
 RUN npm install
 
-RUN npm install esbuild@0.25.0
+RUN npm install esbuild@0.25.8
 
 COPY . .
 
