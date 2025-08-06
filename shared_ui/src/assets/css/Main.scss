@@ -90,9 +90,10 @@ button {
   }
 
   &:disabled {
-    background-color: #cccccc;
+    background-color: var(--button-5-bgc);
     cursor: not-allowed;
-    border: 0px
+    border: 0px;
+    color: var(--text10);
   }
 
 }
@@ -221,15 +222,37 @@ button {
   font-family: monospace;
   resize: vertical;
   height: auto;
-  
+  scrollbar-width: thin;
+  scrollbar-color: var(--text-bcg-2) var(--text-bcg-2);
+
   &:focus {
     border-color: var(--gray-600); 
     outline: none; 
   }
-  
+
   &::placeholder {
     color: var(--gray-500);
   }
+}
+
+.minitext::-webkit-scrollbar {
+  width: 12px;
+  background-color: var(--text-bcg-2);
+}
+
+.minitext::-webkit-scrollbar-track {
+  background-color: var(--text-bcg-2);
+  border-radius: 6px;
+}
+
+.minitext::-webkit-scrollbar-thumb {
+  background-color: var(--gray-500);
+  border-radius: 6px;
+  border: 3px solid var(--text-bcg-2);
+}
+
+.minitext::-webkit-scrollbar-thumb:hover {
+  background-color: var(--gray-600);
 }
 
 .minitext_ {
@@ -578,6 +601,11 @@ input[type="radio"] {
 
 .gap40 {
   gap: 40px;
+}
+
+.centr-align {
+  text-align: center !important;
+  vertical-align: middle !important;
 }
 
 .right-align {

@@ -305,9 +305,8 @@ export default {
 .alert {
   padding: 15px;
   margin-bottom: 20px;
-  border: 1px solid #eee;
-  border-radius: 4px;
-  background-color: #f9f9f9;
+  border-radius: 8px;
+  background-color: var(--container);
 }
 
 #stages_from_area {

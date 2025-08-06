@@ -3,27 +3,25 @@
     <div class="container tools-left">
       <h2 class="title">Работа с паспортом</h2>
       <div id="main_div">
-        <label for="choose_option"> Выберите опцию: </label>
-        <select id="choose_option" v-model="selectedOption">
+        <select id="choose_option" class="select mr" v-model="selectedOption">
           <option value="-">-</option>
           <option value="compare_groups">Сравнить направления</option>
           <option value="calc_groups_in_stages">Рассчитать направления в фазах</option>
         </select>
-        <br><br>
-        <button id="calculate" @click="sendData"> Рассчитать </button>
-        <br><br>
+        <button id="calculate" @click="sendData">{{ buttonText }}</button>
+
         <table id="table_compare_groups" v-show="showCompareTables">
           <thead>
             <tr>
-              <th scope="col"> Таблица направлений </th>
-              <th scope="col"> Таблица фаз(Временная программа) </th>
+              <th scope="col" class="centr-align">Таблица направлений</th>
+              <th scope="col" class="centr-align">Таблица фаз(Временная программа)</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td>
                 <textarea 
-                  class="compare_groups" 
+                  class="minitext"
                   id="table_groups" 
                   v-model="tableGroupsContent"
                   :disabled="selectedOption === 'calc_groups_in_stages'"
@@ -31,8 +29,8 @@
                 ></textarea>
               </td>
               <td>
-                <textarea 
-                  class="compare_groups" 
+                <textarea  начала
+                  class="minitext"
                   id="table_stages" 
                   v-model="tableStagesContent"
                   :placeholder="placeholderTableStages"
@@ -49,6 +47,7 @@
               <td>
                 <textarea 
                   readonly 
+                  class="minitext"
                   id="textarea_result_calc_groups_in_stages"
                   v-model="calcGroupsResult"
                   :placeholder="placeholderGroupsInStagesResult"
@@ -58,13 +57,13 @@
           </tbody>
         </table>
         <table class="result_table" id="table_result_compare_groups" v-show="selectedOption === 'compare_groups'">
-          <caption>Результат сравнения групп:</caption>
+          <caption class="mb10">Результат сравнения групп:</caption>
           <thead>
             <tr>
-              <th scope="col"> Номер направления </th>
-              <th scope="col"> Тип направления </th>
-              <th scope="col"> Фазы в которых участвует направление </th>
-              <th scope="col"> Ошибки </th>
+              <th scope="col" class="centr-align"> Номер направления </th>
+              <th scope="col" class="centr-align"> Тип направления </th>
+              <th scope="col" class="centr-align"> Фазы в которых участвует направление </th>
+              <th scope="col" class="centr-align"> Ошибки </th>
             </tr>
           </thead>
           <tbody>
@@ -124,8 +123,7 @@ export default {
 5	7,8,9,11
 6	1,2,3,4,6,10`,
       
-      placeholderGroupsInStagesResult: `В данном поле будет выведен результат расчёта привязки направлений к фазам
-для "Таблицы направлений"`,
+      placeholderGroupsInStagesResult: `В данном поле будет выведен результат расчёта привязки направлений к фазам, для "Таблицы направлений"`,
       
       // Form data
       tableGroupsContent: "",
@@ -143,6 +141,13 @@ export default {
   computed: {
     showCompareTables() {
       return this.selectedOption !== "-";
+    },
+    buttonText() {
+      return this.selectedOption === "compare_groups" 
+        ? "Сравнить" 
+        : this.selectedOption === "calc_groups_in_stages" 
+          ? "Рассчитать" 
+          : "Выполнить";
     }
   },
   methods: {
@@ -231,13 +236,10 @@ export default {
 </script>
 
 <style scoped>
-#main_div {
-  padding: 20px;
-}
 
 textarea {
   width: 100%;
-  min-height: 200px;
+  min-height: 240px;
   padding: 10px;
   box-sizing: border-box;
 }
@@ -249,39 +251,38 @@ table {
 }
 
 th, td {
-  border: 1px solid #ddd;
+  border: 1px solid var(--border);
   padding: 8px;
   text-align: left;
 }
 
 th {
-  background-color: #f2f2f2;
+  background-color: var(--text-bcg-4);
 }
 
 .errors_content {
-  color: white;
+  color: var(--div);
 }
 
 .result_table {
   margin-top: 20px;
 }
 
-#calculate {
-  padding: 8px 16px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+.input-group {
+  display: flex;
+  align-items: center; 
+  gap: 10px; 
 }
 
-#calculate:hover {
-  background-color: #45a049;
+.select, #calculate {
+  font-family: inherit;
+  font-size: inherit;
+
 }
 
 #choose_option {
-  padding: 8px;
-  border-radius: 4px;
-  border: 1px solid #ddd;
+  width: 420px;
+  padding: 6px 12px;
 }
+
 </style>
