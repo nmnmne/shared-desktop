@@ -177,10 +177,11 @@ export default {
   font-family: monospace;
   white-space: pre-wrap;
   border: 1px solid #ccc;
-  padding: 10px;
+  padding: 6px 2px 2px 6px;
   min-height: 250px;
   border-radius: 5px;
   overflow-x: auto;
+  font-size: 14px;
 }
 
 .code-output .op-and {
