@@ -62,6 +62,7 @@ urlpatterns = [
     ),
     path("api/restart_web_admin/", restart_web_admin.restart_web_admin_api, name="restart_web_admin_api"),
     path("api_dir/", api_dir.api_dir, name="api_dir"),
+    path("controllers_status_check/", api_dir.controllers_status_check, name="controllers_status_check"),
     path("swarco_ssh/", swarco_ssh.swarco_ssh, name="swarco_ssh"),
     path('execute_top/', swarco_ssh.execute_top, name='execute_top'),
     path('execute_ps/', swarco_ssh.execute_ps, name='execute_ps'),

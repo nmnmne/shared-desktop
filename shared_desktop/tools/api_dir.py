@@ -117,3 +117,39 @@ def api_dir(request):
                 }
             )
     return render(request, "tools/api_dir.html")
+
+# Функция проверки связи маршрута 10
+def controllers_status_check(request):
+    # Список тестовых контроллеров
+    controllers = ["827", "818", "828", "854", "3632", "2191", "3139", "3355", "2274"]
+
+    token = get_token(API_KEY)
+    if not token:
+        return JsonResponse({
+            "Success": False,
+            "Message": "Не удалось получить токен авторизации."
+        })
+
+    results = []
+    for controller_id in controllers:
+        status_data = get_controller_status(controller_id, token)
+
+        if status_data.get("Success"):
+            faults = status_data.get("ControllerStatus", {}).get("Faults", [])
+            # Проверяем есть ли ошибка с кодом 10002
+            has_fault = any(f.get("Code") == 10002 for f in faults)
+
+            results.append({
+                "ControllerId": controller_id,
+                "Status": "Нет связи" if has_fault else "На связи"
+            })
+        else:
+            results.append({
+                "ControllerId": controller_id,
+                "Status": "Ошибка запроса"
+            })
+
+    return JsonResponse({
+        "Success": True,
+        "Controllers": results
+    })
