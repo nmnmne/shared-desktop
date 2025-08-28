@@ -39,6 +39,11 @@ const sidebarNav = ref([
     title: "Работа с конфигуратором",
     toolName: "potok_tlc",
   },
+  {
+    id: 5,
+    title: "Номера входов детекторов",
+    toolName: "num_dt",
+  },
 ]);
 
 const activeTool = ref(null);

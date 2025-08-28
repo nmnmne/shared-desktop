@@ -39,6 +39,11 @@ const sidebarNav = ref([
     title: "Конфликты направлений",
     toolName: "calc_conflicts",
   },
+  {
+    id: 5,
+    title: "Номера входов детекторов",
+    toolName: "num_dt",
+  },
 ]);
 
 const activeTool = ref(null);

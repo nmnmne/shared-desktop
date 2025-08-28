@@ -10,6 +10,7 @@
         <DtPotok v-if="toolName === 'dt_potok'" /> 
         <DtPotok2 v-if="toolName === 'dt_potok2'" /> 
         <PotokTLC v-if="toolName === 'potok_tlc'" />
+        <NumDt v-if="toolName === 'num_dt'" />
       </div>
     </div>
   </div>
@@ -23,6 +24,7 @@ import RestartWebAdmin from "@/tools/RestartWebAdmin.vue";
 import DtPotok from "@/tools/DtPotok.vue";
 import DtPotok2 from "@/tools/DtPotok2.vue";
 import PotokTLC from "@/tools/PotokTLC.vue";
+import NumDt from "@/tools/NumDt.vue";
 
 const route = useRoute();
 const router = useRouter();

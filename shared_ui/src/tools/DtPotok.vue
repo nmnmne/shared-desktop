@@ -18,7 +18,11 @@
 
       <div v-if="response">
         <h4>Результат:</h4>
-        <textarea class="minitext" rows="12">{{ response }}</textarea>
+        <div 
+          class="code-output" 
+          contenteditable="true" 
+          v-html="highlightedResponse"
+        ></div>
         <button v-if="response" @click="copyToClipboard" class="btn btn-copy mt-2">
           Скопировать
         </button>
@@ -30,14 +34,12 @@
     </div>
 
     <div class="tools-right">
-
-        <textarea 
-          class="mini-text" 
-          rows="50"
-          v-model="draft"
-          @input="saveDraft"
-        ></textarea>
-
+      <textarea 
+        class="mini-text" 
+        rows="50"
+        v-model="draft"
+        @input="saveDraft"
+      ></textarea>
     </div>
   </div>
 </template>
@@ -63,6 +65,15 @@ export default {
     if (savedDraft) {
       this.draft = savedDraft;
     }
+
+    this.$nextTick(() => {
+      this.setupBracketHover();
+    });
+  },
+  updated() {
+    this.$nextTick(() => {
+      this.setupBracketHover();
+    });
   },
   methods: {
     async generateCondition() {
@@ -91,19 +102,105 @@ export default {
     },
 
     copyToClipboard() {
-      const textarea = this.$el.querySelector('.minitext');
-      textarea.select();
-      document.execCommand('copy');
+      const tempEl = document.createElement("textarea");
+      tempEl.value = this.response;
+      document.body.appendChild(tempEl);
+      tempEl.select();
+      document.execCommand("copy");
+      document.body.removeChild(tempEl);
     },
     
     saveDraft() {
       // Сохраняем черновик в localStorage при каждом изменении
       localStorage.setItem('dtPotokDraft', this.draft);
+    },
+
+    setupBracketHover() {
+      const brackets = this.$el.querySelectorAll('.bracket');
+      brackets.forEach(bracket => {
+        const id = bracket.dataset.id;
+        bracket.addEventListener('mouseenter', () => {
+          const pair = this.$el.querySelectorAll(`.bracket[data-id="${id}"]`);
+          pair.forEach(el => el.classList.add('bracket-hover'));
+        });
+        bracket.addEventListener('mouseleave', () => {
+          const pair = this.$el.querySelectorAll(`.bracket[data-id="${id}"]`);
+          pair.forEach(el => el.classList.remove('bracket-hover'));
+        });
+      });
     }
   },
+  computed: {
+    highlightedResponse() {
+      if (!this.response) return '';
+
+      let text = this.response
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+      // Подсветка операторов
+      text = text.replace(/\b(and)\b/g, '<span class="op-and">$1</span>');
+      text = text.replace(/\b(or)\b/g, '<span class="op-or">$1</span>');
+
+      // Подсветка скобок с парной идентификацией
+      let result = '';
+      let stack = [];
+      let pairId = 0;
+
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        if (char === '(') {
+          pairId++;
+          stack.push(pairId);
+          result += `<span class="bracket" data-id="${pairId}">(</span>`;
+        } else if (char === ')') {
+          const id = stack.pop();
+          result += `<span class="bracket" data-id="${id}">)</span>`;
+        } else {
+          result += char;
+        }
+      }
+
+      return result;
+    }
+  }
 };
 </script>
 
 <style scoped>
+.code-output {
+  background: var(--text-bcg-2); 
+  color: var(--text7);
+  font-family: monospace;
+  white-space: pre-wrap;
+  border: 1px solid #ccc;
+  padding: 6px 2px 2px 6px;
+  min-height: 250px;
+  border-radius: 5px;
+  overflow-x: auto;
+  font-size: 14px;
+}
 
+.code-output ::v-deep .op-and {
+  color: #4ec9b0;
+  font-weight: bold;
+}
+
+.code-output ::v-deep .op-or {
+  color: #c586c0;
+  font-weight: bold;
+}
+
+.code-output ::v-deep .bracket {
+  color: var(--text7);
+  transition: background 0.2s, color 0.2s;
+}
+
+.code-output ::v-deep .bracket-hover {
+  color: var(--bracket);
+  background-color: var(--header-bcg);
+  border-radius: 3px;
+  font-weight: bold;
+}
 </style>

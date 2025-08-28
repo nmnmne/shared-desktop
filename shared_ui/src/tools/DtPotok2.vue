@@ -209,6 +209,5 @@ export default {
   background-color: var(--header-bcg);
   border-radius: 3px;
   font-weight: bold;
-  
 }
 </style>

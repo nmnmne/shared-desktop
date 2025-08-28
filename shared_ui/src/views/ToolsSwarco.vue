@@ -10,6 +10,7 @@
         <SwarcoLog v-if="toolName === 'swarco_log'" />
         <DownloadConfig v-if="toolName === 'download_config'" />
         <CalcConflicts v-if="toolName === 'calc_conflicts'" />
+        <NumDt v-if="toolName === 'num_dt'" />
       </div>
     </div>
   </div>
@@ -23,6 +24,7 @@ import SwarcoITC from "@/tools/SwarcoITC.vue";
 import SwarcoLog from "@/tools/SwarcoLog.vue";
 import DownloadConfig from "@/tools/DownloadConfig.vue";
 import CalcConflicts from "@/tools/CalcConflicts.vue";
+import NumDt from "@/tools/NumDt.vue";
 
 const route = useRoute();
 const router = useRouter();
