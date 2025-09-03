@@ -37,37 +37,34 @@ export default {
   },
   methods: {
     async handleSubmit() {
-      for (let ip of this.serverIPs) {
-        const server = `http://${ip}${this.apiPath}`;
-        
-        try {
-          const response = await fetch(server, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-CSRFToken': this.getCookie('csrftoken'),
-            },
-            body: JSON.stringify({ ip_address: this.ipAddress }),
-          });
+      // Убираем цикл и берем только второй IP
+      const selectedIP = this.serverIPs[1];
+      const server = `http://${selectedIP}${this.apiPath}`;
+      
+      try {
+        const response = await fetch(server, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': this.getCookie('csrftoken'),
+          },
+          body: JSON.stringify({ ip_address: this.ipAddress }),
+        });
 
-          const data = await response.json();
+        const data = await response.json();
 
-          if (data.status === 'success') {
-            this.responseMessage.color = 'green';
-            this.responseMessage.text = data.message;
-            return;
-          } else {
-            this.responseMessage.color = 'red';
-            this.responseMessage.text = data.message;
-            return;
-          }
-        } catch (error) {
-          console.warn(`Ошибка подключения к ${server}:`, error);
+        if (data.status === 'success') {
+          this.responseMessage.color = 'green';
+          this.responseMessage.text = data.message;
+        } else {
+          this.responseMessage.color = 'red';
+          this.responseMessage.text = data.message;
         }
+      } catch (error) {
+        console.warn(`Ошибка подключения к ${server}:`, error);
+        this.responseMessage.color = 'red';
+        this.responseMessage.text = 'Ошибка при подключении к серверу.';
       }
-
-      this.responseMessage.color = 'red';
-      this.responseMessage.text = 'Ошибка при подключении ко всем серверам.';
     },
 
     getCookie(name) {
