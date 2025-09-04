@@ -14,8 +14,8 @@
           <div class="slider"></div>
         </div>
       </div>
-      <a href="http://192.168.45.90/admin/" class="admin-link" target="_blank">Админ</a>
-      <a href="http://192.168.45.90/" class="old-site-link" target="_blank">Старый сайт</a>
+      <a href="http://192.168.45.116/admin/" class="admin-link" target="_blank">Админ</a>
+      <a href="http://192.168.45.116/" class="old-site-link" target="_blank">Старый сайт</a>
 
     </div>
   </footer>
