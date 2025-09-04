@@ -2,18 +2,20 @@
   <div class="container tools-left">
     <h2 class="title">Работа с Traffic Light Configurator</h2>
       <div class="form-inline">
-        <input
+        <textarea
           v-model="condition"
           class="text"
-          type="text"
           maxlength="2000"
           placeholder="Условие продления/перехода"
           autocomplete="off"
-        />
-        <button @click="createFunctions">
+          rows="10"
+          cols="50"
+          style="font-size: 15px;"
+        ></textarea>
+      </div>
+        <button @click="createFunctions" class="mt10">
           Создать
         </button>
-      </div>
       <div v-if="functions.length > 0" class="functions-container">
         <div v-for="func in functions" :key="func" class="function-item">
           <input type="checkbox" :id="func" />
@@ -72,7 +74,9 @@ export default {
             }
           );
 
-          this.functions = response.data.functions;
+          this.functions = response.data.functions.sort((a, b) => {
+            return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+          });
           return;
         } catch (error) {
           console.warn(`Ошибка подключения к ${server}:`, error);

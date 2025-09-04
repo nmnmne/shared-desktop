@@ -37,8 +37,7 @@ export default {
   },
   methods: {
     async handleSubmit() {
-      // Убираем цикл и берем только второй IP
-      const selectedIP = this.serverIPs[1];
+      const selectedIP = this.serverIPs[0];
       const server = `http://${selectedIP}${this.apiPath}`;
       
       try {
