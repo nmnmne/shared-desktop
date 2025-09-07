@@ -11,11 +11,11 @@ import re
 
 Файл должен иметь следующую структуру:
 
-| A (Любые данные) | B (Любые данные) | C (IP адрес)     | D (Тип ДК) | E | F | G       | H       |
-|------------------|------------------|------------------|------------|---|---|---------|---------|
-| ...              | ...              | 192.168.1.1      | Swarco     |   |   |         |         |
-| ...              | ...              | 10.10.10.2       | Поток (P)  |   |   |         |         |
-| ...              | ...              | 172.16.0.3       | Поток (S)  |   |   |         |         |
+| A (Любые данные) | B (Любые данные) | C (IP адрес)     | D (Тип ДК) | E (Версия) | F (Статус) |
+|------------------|------------------|------------------|------------|------------|------------|
+| ...              | ...              | 192.168.1.1      | Swarco     |            |            |
+| ...              | ...              | 10.10.10.2       | Поток (P)  |            |            |
+| ...              | ...              | 172.16.0.3       | Поток (S)  |            |            |
 
 ОБЯЗАТЕЛЬНЫЕ ТРЕБОВАНИЯ:
 1. IP-адреса должны быть в столбце C (3-й столбец)
@@ -23,17 +23,16 @@ import re
 3. Данные должны начинаться со 2-й строки (1-я строка - заголовки)
 
 ЧТО СКРИПТ СДЕЛАЕТ:
-- Добавит столбцы E, F, G, H с результатами
-- В столбце G будет версия прошивки или сообщение об ошибке
-- В столбце H будет статус обработки
+- Заполнит столбец E версией прошивки или сообщением об ошибке
+- Заполнит столбец F статусом обработки
 - Скрипт пропустит уже обработанные строки, обработает только ошибочные или пустые
 
 ПРИМЕР РЕЗУЛЬТАТА:
-| C (IP)       | D (Тип ДК) | E (IP)       | F (Тип ДК) | G (Версия) | H (Статус)            |
-|--------------|------------|--------------|------------|------------|-----------------------|
-| 192.168.1.1  | Swarco     | 192.168.1.1  | Swarco     | v2.1.5     | успешно               |
-| 10.10.10.2   | Поток (P)  | 10.10.10.2   | Поток (P)  | нет связи  | нет ping              |
-| 172.16.0.3   | Поток (S)  | 172.16.0.3   | Поток (S)  | v1.0.0     | было обработано ранее |
+| C (IP)       | D (Тип ДК) | E (Версия) | F (Статус)            |
+|--------------|------------|------------|-----------------------|
+| 192.168.1.1  | Swarco     | v2.1.5     | успешно               |
+| 10.10.10.2   | Поток (P)  | нет связи  | нет ping              |
+| 172.16.0.3   | Поток (S)  | v1.0.0     | было обработано ранее |
 """
 
 # Функция для проверки валидности IP-адреса
@@ -124,10 +123,9 @@ def process_excel(file_path):
 
     # Добавим заголовки для новых столбцов (если их еще нет)
     if sheet.cell(row=1, column=5).value is None:
-        sheet.cell(row=1, column=5, value="IP")
-        sheet.cell(row=1, column=6, value="Тип ДК")
-        sheet.cell(row=1, column=7, value="Версия")
-        sheet.cell(row=1, column=8, value="Статус")  # Добавляем заголовок для столбца H
+        sheet.cell(row=1, column=5, value="Версия")
+    if sheet.cell(row=1, column=6).value is None:
+        sheet.cell(row=1, column=6, value="Статус")
 
     # Статистика
     total_processed = 0
@@ -140,17 +138,17 @@ def process_excel(file_path):
     rechecked_count = 0
 
     # Проходим по строкам начиная с 2-й (пропускаем заголовки)
-    for row in sheet.iter_rows(min_row=2, min_col=3, max_col=7):  # max_col=7 чтобы проверять столбец G
+    for row in sheet.iter_rows(min_row=2, min_col=3, max_col=6):  # max_col=6 чтобы проверять столбец F
         ip = row[0].value  # Столбец C (IP)
         protocol = row[1].value  # Столбец D (Тип ДК)
-        existing_version = row[4].value  # Столбец G (Версия) - это 5-й элемент в кортеже (индекс 4)
+        existing_version = row[2].value  # Столбец E (Версия) - это 3-й элемент в кортеже (индекс 2)
 
         total_processed += 1
 
         # Проверяем, нужно ли перепроверять строку
         if existing_version is not None and not should_recheck(existing_version):
             print(f"Строка {row[0].row} обработано ранее ({existing_version}), пропускаем.")
-            sheet.cell(row=row[0].row, column=8, value="обработано ранее")
+            sheet.cell(row=row[0].row, column=6, value="обработано ранее")
             previously_processed_correct += 1
             continue
 
@@ -159,17 +157,15 @@ def process_excel(file_path):
             print(f"Строка {row[0].row} имеет версию '{existing_version}', перепроверяем...")
             rechecked_count += 1
             # Очищаем старые значения для перепроверки
-            sheet.cell(row=row[0].row, column=5, value=None)  # IP (столбец E)
-            sheet.cell(row=row[0].row, column=6, value=None)  # Тип ДК (столбец F)
-            sheet.cell(row=row[0].row, column=7, value=None)  # Версия (столбец G)
-            sheet.cell(row=row[0].row, column=8, value=None)  # Статус (столбец H)
+            sheet.cell(row=row[0].row, column=5, value=None)  # Версия (столбец E)
+            sheet.cell(row=row[0].row, column=6, value=None)  # Статус (столбец F)
 
         if ip and protocol:
             # Проверяем валидность IP-адреса
             if not is_valid_ip(str(ip).strip()):
                 print(f"Невалидный IP-адрес: {ip}")
-                sheet.cell(row=row[0].row, column=7, value="проверьте IP адрес")
-                sheet.cell(row=row[0].row, column=8, value="ошибка")  # Статус "ошибка" для невалидного IP
+                sheet.cell(row=row[0].row, column=5, value="проверьте IP адрес")
+                sheet.cell(row=row[0].row, column=6, value="ошибка")
                 invalid_ip_count += 1
                 continue
                 
@@ -179,18 +175,16 @@ def process_excel(file_path):
             ping_result = check_ping(ip)
             if not ping_result:
                 # Если пинг не прошел, записываем "нет связи"
-                sheet.cell(row=row[0].row, column=7, value="нет связи")
-                sheet.cell(row=row[0].row, column=8, value="ошибка")  # Статус "ошибка" для отсутствия ping
+                sheet.cell(row=row[0].row, column=5, value="нет связи")
+                sheet.cell(row=row[0].row, column=6, value="ошибка")
                 print(f"IP {ip} недоступен, записано 'нет связи'.")
                 no_connection_count += 1
             else:
                 # Отправляем запрос к API для получения версии
                 version = get_firmware(ip, protocol)
 
-                # Записываем полученные данные в Excel в новые столбцы
-                sheet.cell(row=row[0].row, column=5, value=ip)  # IP (столбец E)
-                sheet.cell(row=row[0].row, column=6, value=protocol)  # Тип ДК (столбец F)
-                sheet.cell(row=row[0].row, column=7, value=version)  # Версия (столбец G)
+                # Записываем полученные данные в Excel
+                sheet.cell(row=row[0].row, column=5, value=version)  # Версия (столбец E)
                 
                 # Записываем статус обработки
                 # Проверяем, начинается ли версия с "Поток" или "ITC"
@@ -201,14 +195,14 @@ def process_excel(file_path):
                     status = "ошибка"
                     error_count += 1
                 
-                sheet.cell(row=row[0].row, column=8, value=status)
+                sheet.cell(row=row[0].row, column=6, value=status)  # Статус (столбец F)
 
                 # Выводим результат в консоль
                 print(f"IP: {ip}, Тип ДК: {protocol}, Версия: {version}, Статус: {status}")
         else:
             print(f"Пропущена строка {row[0].row} с неверными данные: IP = {ip}, Тип ДК = {protocol}")
-            sheet.cell(row=row[0].row, column=7, value="неверные данные")
-            sheet.cell(row=row[0].row, column=8, value="ошибка")  # Статус "ошибка" для неверных данных
+            sheet.cell(row=row[0].row, column=5, value="неверные данные")
+            sheet.cell(row=row[0].row, column=6, value="ошибка")
             error_count += 1
 
     # Сохраняем обновленный файл через диалоговое окно
