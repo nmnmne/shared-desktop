@@ -30,7 +30,6 @@
         {{ conditionResult }}
       </label>
       </div>
-
   </div>
 </template>
 
