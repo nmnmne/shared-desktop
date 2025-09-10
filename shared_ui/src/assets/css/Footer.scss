@@ -46,7 +46,7 @@
   }
 
   .toggle-switch.active {
-    background-color: var(--active-hdr);
+    background-color: var(--theme);
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
 
     .slider {
@@ -62,7 +62,7 @@
   transition: color 0.3s;
 
   &:hover {
-    color: var(--active-hdr);
+    color: var(--text9);
   }
 }
 
@@ -80,6 +80,6 @@
   }
 
   &:hover {
-    color: var(--active-hdr);
+    color: var(--text9);
   }
 }

@@ -1,14 +1,14 @@
 <template>
   <div class="tools">
     <div class="container tools-left">
-      <h2 class="title">Генерация условий вызова или продления</h2>
+      <h2 class="title">Генерация простых условий вызова или продления</h2>
+
       <div class="form-inline">
         <input 
           type="text" 
           v-model="detRangesAndGroup" 
           placeholder="1-4, 7-7, 3" 
           class="text"
-          style="width:28ch;"
           @keyup.enter="generateCondition"
         />
         <button @click="generateCondition" class="btn btn-primary mt-2">
@@ -30,6 +30,44 @@
 
       <div v-if="error" class="alert alert-danger mt-3">
         <strong>Ошибка:</strong> {{ error }}
+      </div>
+
+      <div class="instruction-box mt30">
+        <p>Для генерации введите диапазоны номеров детекторов и номер группы в следующем формате:</p>
+        <ul>
+          <li>Диапазоны номеров детекторов указываются через дефис или плюс, например: <code>1-4, 7-12, 14-14</code></li>
+          <li>Номер группы указывается отдельно после диапазонов детекторов, например: <code>3</code></li>
+          <li>Пример корректного ввода: <code>1-4, 7-12, 3</code></li>
+          <li>При использовании дефиса диапазон детекторов объединяется логическим OR, при использовании плюса логическим AND.</li>
+        </ul>
+        
+        <div class="hints-section">
+          <h4>Подсказки:</h4>
+          <div class="hint-item">
+            <code>() and mr(G)</code>
+            <span class="hint-description">Продление по ТМакс</span>
+          </div>
+          <div class="hint-item">
+            <code>dde(D1) or dde(D2)</code>
+            <span class="hint-description">True если детекторы в ошибке</span>
+          </div>
+          <div class="hint-item">
+            <code>(ddr(D18) or ddr(D19) or ddr(D20)) and (fctg(G4)<35)</code>
+            <span class="hint-description">продление по таймеру</span>
+          </div>
+          <div class="hint-item">
+            <code>(fctg(G11) <= 70) and (ddr(D127) or ddr(D128))</code>
+            <span class="hint-description">Переходы по таймеру</span>
+          </div>
+          <div class="hint-item">
+            <code>(ddr(D11) or ddr(D19)) and not(ddr(D14)) and not(ddr(D20))</code>
+            <span class="hint-description">Инверсия</span>
+          </div>
+          <div class="hint-item">
+            <code>(ddr(D1) or ddr(D2)) and (stgp()!=1)</code>
+            <span class="hint-description">Предыдущая фаза</span>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -60,7 +98,6 @@ export default {
     };
   },
   mounted() {
-    // Загружаем черновик из localStorage при загрузке компонента
     const savedDraft = localStorage.getItem('dtPotokDraft');
     if (savedDraft) {
       this.draft = savedDraft;
@@ -111,7 +148,6 @@ export default {
     },
     
     saveDraft() {
-      // Сохраняем черновик в localStorage при каждом изменении
       localStorage.setItem('dtPotokDraft', this.draft);
     },
 
@@ -139,11 +175,9 @@ export default {
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
 
-      // Подсветка операторов
       text = text.replace(/\b(and)\b/g, '<span class="op-and">$1</span>');
       text = text.replace(/\b(or)\b/g, '<span class="op-or">$1</span>');
 
-      // Подсветка скобок с парной идентификацией
       let result = '';
       let stack = [];
       let pairId = 0;
@@ -169,12 +203,94 @@ export default {
 </script>
 
 <style scoped>
+.instruction-box {
+  background: var(--text-bcg-2);
+  border: 1px solid var(--border-2);
+  border-radius: 5px;
+  padding: 15px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: var(--text7);
+}
+
+.instruction-box h4 {
+  margin-top: 0;
+  color: var(--text7);
+  border-bottom: 1px solid var(--border-2);
+  padding-bottom: 8px;
+}
+
+.instruction-box ul {
+  margin: 10px 0;
+  padding-left: 20px;
+}
+
+.instruction-box li {
+  margin-bottom: 5px;
+  color: var(--text7);
+}
+
+.instruction-box code {
+  background: var(--text-bcg);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: monospace;
+  color: var(--text9);
+  border: 1px solid var(--border-2);
+}
+
+.instruction-box p {
+  color: var(--text7);
+  margin-bottom: 10px;
+}
+
+.instruction-box p:last-child {
+  margin-bottom: 0;
+  font-style: italic;
+  color: var(--text10);
+}
+
+/* Стили для секции с подсказками */
+.hints-section {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid var(--border-2);
+}
+
+.hints-section h4 {
+  color: var(--text7);
+  margin-bottom: 12px;
+  font-size: 15px;
+}
+
+.hint-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 8px;
+  background-color: var(--text-bcg-3);
+  border-radius: 4px;
+  border-left: 3px solid var(--button-3-bgc);
+}
+
+.hint-item code {
+  flex: 0 0 auto;
+  margin-right: 12px;
+  background: var(--text-bcg-1);
+  color: var(--text9);
+}
+
+.hint-description {
+  color: var(--text7);
+  font-size: 13px;
+}
+
 .code-output {
   background: var(--text-bcg-2); 
   color: var(--text7);
   font-family: monospace;
   white-space: pre-wrap;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-2);
   padding: 6px 2px 2px 6px;
   min-height: 250px;
   border-radius: 5px;
@@ -183,12 +299,12 @@ export default {
 }
 
 .code-output ::v-deep .op-and {
-  color: #4ec9b0;
+  color: var(--green1);
   font-weight: bold;
 }
 
 .code-output ::v-deep .op-or {
-  color: #c586c0;
+  color: var(--yellow);
   font-weight: bold;
 }
 
@@ -202,5 +318,49 @@ export default {
   background-color: var(--header-bcg);
   border-radius: 3px;
   font-weight: bold;
+}
+
+.alert-danger {
+  background-color: var(--button-4-bgc);
+  border-color: var(--border);
+  color: var(--text4);
+}
+
+.btn-primary {
+  background-color: var(--button-1-bgc);
+  border-color: var(--border);
+  color: var(--text4);
+}
+
+.btn-primary:hover {
+  background-color: var(--hover-sbr);
+  border-color: var(--border);
+}
+
+.btn-copy {
+  background-color: var(--button-2-bgc);
+  border-color: var(--border);
+  color: var(--text4);
+}
+
+.btn-copy:hover {
+  background-color: var(--hover-sbr);
+  border-color: var(--border);
+}
+
+.text {
+  background-color: var(--text-bcg-2);
+  color: var(--text7);
+  border: 1px solid var(--border-2);
+}
+
+.text::placeholder {
+  color: var(--text10);
+}
+
+.mini-text {
+  background-color: var(--text-bcg-2);
+  color: var(--text7);
+  border: 1px solid var(--border-2);
 }
 </style>

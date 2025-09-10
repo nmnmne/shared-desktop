@@ -114,12 +114,12 @@ export default {
 
 .detectors-table th {
   background-color: var(--header-bcg);
-  color: var(--text-bcg-6);
+  color: var(--text7);
   font-weight: 600;
 }
 
 .detectors-table tr:nth-child(even) {
-  background-color: var(--text-bcg-8);
+  background-color: var(--text-bcg-2);
 }
 
 .detectors-table td:hover,

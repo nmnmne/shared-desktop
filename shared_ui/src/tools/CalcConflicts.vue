@@ -2,11 +2,11 @@
   <div class="tools">
     <div class="container tools-left">
       <h2 class="title">Расчет конфликтов направлений</h2>
-      
+
       <!-- Инструкция -->
-      <div class="alert alert-light">
-          <li>Введите направления для каждой фазы в отдельной строке.</li>
-          <li>Отметьте опции для создания файлов конфигурации и конфликтов по необходимости.</li>
+      <div class="info">
+        <li>Введите направления для каждой фазы в отдельной строке.</li>
+        <li>Отметьте опции для создания файлов конфигурации и конфликтов по необходимости.</li>
       </div>
 
       <!-- Тип контроллера -->
@@ -39,10 +39,10 @@
       <br>
 
       <!-- Контейнеры ввода данных -->
-      <div class="input-container form-inline gap40">
+
         <div class="input-section right-align">
           <textarea v-model="stagesInput" @input="parseUserData" class="minitextarea"></textarea>
-        </div>
+
         
         <div class="output-section">
           <div class="output-content" style="white-space: pre-line">{{ prettyOutputStages }}</div>
@@ -55,7 +55,7 @@
       </div>
     </div>
     <div class="tools-right">
-            <!-- Результаты расчета -->
+      <!-- Результаты расчета -->
       <div id="calculated_content" v-if="responseData">
         
         <!-- Ссылки для скачивания -->
@@ -65,7 +65,7 @@
           <a v-if="responseData.config_file" :href="responseData.config_file.url_to_file" download>Скачать созданный конфигурауционный файл с расчитанными данными</a>
           <br><br>
         </div>
-        
+
         <!-- Матрица конфликтов -->
         <table id="output_matrix">
           <caption>Матрица конфликтов:</caption>
@@ -340,6 +340,7 @@ fieldset {
   border: 1px solid #ddd;
   padding: 10px;
   border-radius: 4px;
+  background-color: var(--text-bcg-2);
 }
 
 legend {
