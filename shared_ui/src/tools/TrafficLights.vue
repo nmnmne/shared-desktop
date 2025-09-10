@@ -810,7 +810,7 @@ export default {
 .controller-group {
   margin-bottom: 20px;
   padding: 15px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-2);
   border-radius: 5px;
   background-color: var(--text-bcg-7);
 }
@@ -818,7 +818,7 @@ export default {
 .preset-group {
   margin-bottom: 20px;
   padding: 4px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-2);
   border-radius: 5px;
   background-color: var(--text-bcg-7);
   width: 100%;

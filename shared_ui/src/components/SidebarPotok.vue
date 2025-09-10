@@ -26,12 +26,12 @@ const sidebarNav = ref([
   },
   {
     id: 2,
-    title: "Генератор строк",
+    title: "Генератор простых строк",
     toolName: "dt_potok",
   },
   {
     id: 3,
-    title: "Генератор строк 2",
+    title: "Генератор сложных строк",
     toolName: "dt_potok2",
   },
   {
