@@ -127,5 +127,4 @@ export default {
   background-color: var(--text-bcg-6);
   font-weight: bold;
 }
-
 </style>

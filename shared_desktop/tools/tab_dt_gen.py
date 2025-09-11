@@ -9,6 +9,8 @@ from docx.enum.section import WD_ORIENT
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 import io
+import json
+import base64
 from collections import defaultdict
 
 class GenerateDetectorTable(APIView):
@@ -20,93 +22,127 @@ class GenerateDetectorTable(APIView):
         
         try:
             expanded_detectors = self._expand_detectors(detectors)
-            document = Document()
+            
+            # Подготовка данных для расчета КИ ПД-16
+            ki_pd16_map = self._calculate_ki_pd16_map(expanded_detectors)
+            
+            # Генерируем данные для таблицы
+            table_data = []
+            detector_idx = 1
+            
+            for detector_name in expanded_detectors:
+                detector_data = self._generate_detector_data(detector_name, detector_idx, expanded_detectors, ki_pd16_map)
+                table_data.append(detector_data)
+                detector_idx += 1
+            
+            # Заменяем все "7" на "6" в столбце offset
+            for row in table_data:
+                if row.get('offset') == '7':
+                    row['offset'] = '6'
+            
+            # Создаем DOCX документ
+            document = self._create_document(table_data)
+            
+            # Сохраняем документ в BytesIO
+            file_stream = io.BytesIO()
+            document.save(file_stream)
+            file_stream.seek(0)
+            
+            # Кодируем файл в base64 для включения в JSON
+            file_base64 = base64.b64encode(file_stream.getvalue()).decode('utf-8')
+            
+            # Формируем ответ с обоими форматами
+            response_data = {
+                "success": True,
+                "table_data": table_data,
+                "file": {
+                    "filename": "detectors_table.docx",
+                    "content_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    "base64": file_base64,
+                    "size": len(file_base64)  # Размер в байтах после кодирования
+                },
+                "detectors_count": len(table_data),
+                "expanded_detectors": expanded_detectors
+            }
+            
+            # Устанавливаем заголовок для скачивания файла
+            response = Response(response_data, status=status.HTTP_200_OK)
+            response['Content-Disposition'] = 'attachment; filename=detectors_table.docx'
+            
+            return response
 
-            style = document.styles['Normal']
-            font = style.font
-            font.name = 'Times New Roman'
-            font.size = Pt(12)
+        except Exception as e:
+            return Response(
+                {"error": f"Ошибка при генерации таблицы: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
-            section = document.sections[0]
-            section.page_height = Inches(11.69)
-            section.page_width = Inches(8.27)
-            section.orientation = WD_ORIENT.PORTRAIT
-            section.top_margin = Inches(1.8 / 2.54)
-            section.left_margin = Inches(0.71 / 2.54)
-            section.right_margin = Inches(1.02 / 2.54) 
-            section.bottom_margin = Inches(1.55 / 2.54)
-            section.gutter = Inches(0)
+    def _create_document(self, table_data):
+        """Создает DOCX документ из данных таблицы"""
+        document = Document()
 
-            table = document.add_table(rows=1, cols=11)
-            table.style = 'Table Grid'
+        style = document.styles['Normal']
+        font = style.font
+        font.name = 'Times New Roman'
+        font.size = Pt(12)
 
-            headers = [
-                'Детектор', '№ Входа платы IO/входа ДК', 'КИ ПД-2', 'КИ ПД-16',
-                '№ Направления', 'Вынос, м', 'Запрос', 'Разрыв, с', 'Счет ТС',
-                'Авария незанят, мин', 'Авария занят, мин'
-            ]
+        section = document.sections[0]
+        section.page_height = Inches(11.69)
+        section.page_width = Inches(8.27)
+        section.orientation = WD_ORIENT.PORTRAIT
+        section.top_margin = Inches(1.8 / 2.54)
+        section.left_margin = Inches(0.71 / 2.54)
+        section.right_margin = Inches(1.02 / 2.54) 
+        section.bottom_margin = Inches(1.55 / 2.54)
+        section.gutter = Inches(0)
 
-            hdr_cells = table.rows[0].cells
-            for i, header in enumerate(headers):
-                hdr_cells[i].text = header
-                paragraph = hdr_cells[i].paragraphs[0]
-                paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
-                run = paragraph.runs[0]
-                run.font.bold = True
-                run.font.italic = True
-                run.font.color.rgb = RGBColor(0, 31, 95)
-                tc = hdr_cells[i]._tc
+        table = document.add_table(rows=1, cols=10)
+        table.style = 'Table Grid'
+
+        headers = [
+            'Детектор', '№ Входа платы IO/входа ДК', 'КИ ПД-2', 'КИ ПД-16',
+            '№ Направления', 'Вынос, м', 'Запрос', 'Разрыв, с',
+            'Авария незанят, мин', 'Авария занят, мин'
+        ]
+
+        hdr_cells = table.rows[0].cells
+        for i, header in enumerate(headers):
+            hdr_cells[i].text = header
+            paragraph = hdr_cells[i].paragraphs[0]
+            paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            run = paragraph.runs[0]
+            run.font.bold = True
+            run.font.italic = True
+            run.font.color.rgb = RGBColor(0, 31, 95)
+            tc = hdr_cells[i]._tc
+            tcPr = tc.get_or_add_tcPr()
+            vAlign = OxmlElement('w:vAlign')
+            vAlign.set(qn('w:val'), 'center')
+            tcPr.append(vAlign)
+
+        # Добавляем строки с данными
+        for row_data in table_data:
+            row_cells = table.add_row().cells
+
+            for i, key in enumerate([
+                'name', 'io_board_input', 'ki_pd_2', 'ki_pd_16', 
+                'direction_number', 'offset', 'request', 'gap', 
+                'unoccupied_alarm', 'occupied_alarm'
+            ]):
+                row_cells[i].text = str(row_data.get(key, ''))
+                cell = row_cells[i]
+                for paragraph in cell.paragraphs:
+                    paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                    for run in paragraph.runs:
+                        run.font.name = 'Times New Roman'
+                        run.font.size = Pt(12)
+                tc = cell._tc
                 tcPr = tc.get_or_add_tcPr()
                 vAlign = OxmlElement('w:vAlign')
                 vAlign.set(qn('w:val'), 'center')
                 tcPr.append(vAlign)
 
-            # Подготовка данных для расчета КИ ПД-16
-            ki_pd16_map = self._calculate_ki_pd16_map(expanded_detectors)
-
-            # Сортировка детекторов и добавление строк
-            detector_idx = 1  # Начальный индекс для детектора
-            for detector_name in expanded_detectors:
-                detector_data = self._generate_detector_data(detector_name, detector_idx, expanded_detectors, ki_pd16_map)
-                row_cells = table.add_row().cells
-
-                for i, key in enumerate([
-                    'name', 'io_board_input', 'ki_pd_2', 'ki_pd_16', 
-                    'direction_number', 'offset', 'request', 'gap', 
-                    'ts_count', 'unoccupied_alarm', 'occupied_alarm'
-                ]):
-                    row_cells[i].text = str(detector_data.get(key, ''))
-                    cell = row_cells[i]
-                    for paragraph in cell.paragraphs:
-                        paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
-                        for run in paragraph.runs:
-                            run.font.name = 'Times New Roman'
-                            run.font.size = Pt(12)
-                    tc = cell._tc
-                    tcPr = tc.get_or_add_tcPr()
-                    vAlign = OxmlElement('w:vAlign')
-                    vAlign.set(qn('w:val'), 'center')
-                    tcPr.append(vAlign)
-
-                detector_idx += 1  # Увеличение индекса для следующего детектора
-
-            file_stream = io.BytesIO()
-            document.save(file_stream)
-            file_stream.seek(0)
-
-            response = HttpResponse(
-                file_stream.getvalue(),
-                content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-            )
-            response['Content-Disposition'] = 'attachment; filename=detectors_table.docx'
-            return response
-
-        except Exception as e:
-            return HttpResponse(
-                f"Ошибка при генерации таблицы: {str(e)}",
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                content_type='text/plain'
-            )
+        return document
 
     def _expand_detectors(self, detectors):
         expanded = []
@@ -162,8 +198,8 @@ class GenerateDetectorTable(APIView):
             
             # Проверяем условия для перехода на следующую плату
             if input_number == 14 or input_number == 15 or input_number == 16:
-                # Для входов 14-16 - переход если вынос 7, - или 10
-                if offset in ["7", "-", "10"]:
+                # Для входов 14-16 - переход если вынос 6, - или 10
+                if offset in ["6", "-", "10"]:
                     board_number += 1
                     input_number = 1
                 else:
@@ -202,7 +238,6 @@ class GenerateDetectorTable(APIView):
                 'offset': self._generate_offset(detector_type, direction, detector_name, all_detectors),
                 'request': '-',  # Всегда -
                 'gap': self._generate_gap(detector_type),
-                'ts_count': '+',
                 'unoccupied_alarm': self._generate_unoccupied_alarm(detector_type),
                 'occupied_alarm': self._generate_occupied_alarm(detector_type),
             }
@@ -249,15 +284,14 @@ class GenerateDetectorTable(APIView):
             
             # Логика для деления по 2, если количество детекторов делится на 2 и не более 4
             if count % 2 == 0 and count <= 4:
-                pattern = ['2', '7']  # Для 2 и 4 детекторов, делим на 2
+                pattern = ['2', '7']  # 7 будет заменено на 6 позже
             else:
-                pattern = ['2', '6', '10']  # Для остальных — по 3 (или другие значения)
+                pattern = ['2', '6', '10']
 
             idx = detectors_in_direction.index(detector_name) % len(pattern)
             return pattern[idx]
         except:
             return '2'
-
 
     def _generate_gap(self, detector_type):
         return '3' if detector_type == 'D' else '-'

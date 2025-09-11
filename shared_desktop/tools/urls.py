@@ -1,4 +1,4 @@
-"""board URL configuration."""
+"""tools URL configuration."""
 
 from django.urls import path, include
 

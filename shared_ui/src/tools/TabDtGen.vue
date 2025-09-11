@@ -54,8 +54,44 @@
         Сгенерировать таблицу
       </button>
 
+      <div v-if="responseData" class="download-section">
+        <button class="download-btn" @click="downloadFile">
+          📥 Скачать DOCX файл
+        </button>
+      </div>
+
       <div v-if="responseMessage" class="response-message" :class="{ error: responseIsError }">
         {{ responseMessage }}
+      </div>
+    </div>
+
+    <div class="tools-right">
+      <div v-if="responseData && responseData.table_data" class="table-preview">
+        <h3>Предпросмотр таблицы</h3>
+        <div class="table-container">
+          <table class="detectors-table" ref="tableToCopy">
+            <thead>
+              <tr>
+                <th v-for="header in headers" :key="header">{{ header }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(row, index) in responseData.table_data" :key="index">
+                <td v-for="key in tableKeys" :key="key">{{ row[key] }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <button class="copy-table-btn" @click="copyTableToClipboard">
+          📋 Скопировать таблицу (без заголовков)
+        </button>
+        <div v-if="copyMessage" class="copy-message" :class="{ error: copyIsError }">
+          {{ copyMessage }}
+        </div>
+      </div>
+      
+      <div v-else class="empty-state">
+        <p>Здесь будет отображаться предпросмотр таблицы после генерации</p>
       </div>
     </div>
   </div>
@@ -76,28 +112,33 @@ export default {
       jsonPreview: '{\n  "detectors": []\n}',
       responseMessage: "",
       responseIsError: false,
-      responseData: null
+      responseData: null,
+      copyMessage: "",
+      copyIsError: false,
+      headers: [
+        'Детектор', '№ Входа платы IO/входа ДК', 'КИ ПД-2', 'КИ ПД-16',
+        '№ Направления', 'Вынос, м', 'Запрос', 'Разрыв, с',
+        'Авария незанят, мин', 'Авария занят, мин'
+      ],
+      tableKeys: [
+        'name', 'io_board_input', 'ki_pd_2', 'ki_pd_16', 
+        'direction_number', 'offset', 'request', 'gap', 
+        'unoccupied_alarm', 'occupied_alarm'
+      ]
     };
   },
   methods: {
     handleInput(event) {
-    // Сохраняем позицию курсора
-    const cursorPosition = event.target.selectionStart;
+      const cursorPosition = event.target.selectionStart;
+      this.detectorsInput = event.target.value.toUpperCase();
+      this.$nextTick(() => {
+        event.target.setSelectionRange(cursorPosition, cursorPosition);
+      });
+      this.updateJsonPreview();
+    },
     
-    // Преобразуем текст к верхнему регистру
-    this.detectorsInput = event.target.value.toUpperCase();
-    
-    // Восстанавливаем позицию курсора после обновления значения
-    this.$nextTick(() => {
-      event.target.setSelectionRange(cursorPosition, cursorPosition);
-    });
-    
-    // Обновляем JSON-превью
-    this.updateJsonPreview();
-  },
     updateJsonPreview() {
       const detectorsArray = this.parseDetectorsInput();
-      // Формируем JSON с компактным массивом detectors
       this.jsonPreview = `{
   "detectors": [${detectorsArray.map(d => `"${d}"`).join(',')}]
 }`;
@@ -121,6 +162,7 @@ export default {
 
       this.responseMessage = "Отправка данных...";
       this.responseIsError = false;
+      this.responseData = null;
 
       const requestData = {
         detectors: detectors
@@ -130,55 +172,41 @@ export default {
         let server = `http://${ip}${this.apiPath1}`;
         
         try {
-          // 1. Логируем данные перед отправкой
           console.log("Отправляемые данные:", JSON.stringify(requestData));
           
-          // 2. Отправка через axios с явными настройками
           const response = await axios({
             method: 'post',
             url: server,
-            data: requestData, // axios сам сериализует в JSON
+            data: requestData,
             headers: {
               'Authorization': `Token ${this.token}`,
               'Content-Type': 'application/json',
             },
-            responseType: 'blob' // Важно для получения бинарных данных
+            responseType: 'json'
           });
 
-          // 3. Проверяем успешность запроса
           if (response.status !== 200) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
 
-          // 4. Создаем ссылку для скачивания
-          const url = window.URL.createObjectURL(new Blob([response.data]));
-          const link = document.createElement('a');
-          link.href = url;
-          link.setAttribute('download', 'detectors_table.docx');
-          document.body.appendChild(link);
-          link.click();
-          
-          // 5. Убираем ссылку после скачивания
-          setTimeout(() => {
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
-          }, 100);
-          
-          this.responseMessage = "Таблица успешно сгенерирована и скачана!";
+          this.responseData = response.data;
+          this.responseMessage = "Таблица успешно сгенерирована!";
           this.responseIsError = false;
           return;
           
         } catch (error) {
           console.error(`Ошибка при подключении к ${server}:`, error);
           
-          // Детализация ошибки
           let errorMessage = error.message;
           if (error.response) {
             errorMessage += ` (Status: ${error.response.status})`;
             if (error.response.data) {
               try {
-                const errorData = await error.response.data.text();
-                errorMessage += ` - ${errorData}`;
+                if (typeof error.response.data === 'object') {
+                  errorMessage += ` - ${JSON.stringify(error.response.data)}`;
+                } else {
+                  errorMessage += ` - ${error.response.data}`;
+                }
               } catch (e) {
                 console.error("Ошибка чтения тела ошибки:", e);
               }
@@ -189,12 +217,130 @@ export default {
           this.responseIsError = true;
         }
       }
+    },
+
+    downloadFile() {
+      if (!this.responseData || !this.responseData.file || !this.responseData.file.base64) {
+        this.responseMessage = "Нет данных файла для скачивания";
+        this.responseIsError = true;
+        return;
+      }
+
+      try {
+        const binaryString = atob(this.responseData.file.base64);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        
+        const blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', this.responseData.file.filename || 'detectors_table.docx');
+        document.body.appendChild(link);
+        link.click();
+        
+        setTimeout(() => {
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+        }, 100);
+        
+        this.responseMessage = "Файл успешно скачан!";
+        this.responseIsError = false;
+        
+      } catch (error) {
+        this.responseMessage = `Ошибка при скачивании файла: ${error.message}`;
+        this.responseIsError = true;
+      }
+    },
+
+    copyTableToClipboard() {
+      if (!this.responseData || !this.responseData.table_data) {
+        this.copyMessage = "Нет данных таблицы для копирования";
+        this.copyIsError = true;
+        return;
+      }
+
+      try {
+        // Создаем HTML-таблицу без заголовков
+        let htmlContent = `<table style="font-family: 'Times New Roman', serif; font-size: 12pt; border-collapse: collapse; width: 100%;">`;
+        
+        // Добавляем только строки с данными (без заголовков)
+        this.responseData.table_data.forEach(row => {
+          htmlContent += `<tr style="border: 1px solid black;">`;
+          this.tableKeys.forEach(key => {
+            htmlContent += `<td style="border: 1px solid black; padding: 4px; text-align: center;">${row[key] || ''}</td>`;
+          });
+          htmlContent += `</tr>`;
+        });
+        
+        htmlContent += `</table>`;
+
+        // Создаем временный элемент для копирования
+        const tempElement = document.createElement('div');
+        tempElement.innerHTML = htmlContent;
+        document.body.appendChild(tempElement);
+
+        // Выбираем содержимое
+        const range = document.createRange();
+        range.selectNode(tempElement);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+
+        // Копируем в буфер обмена
+        const successful = document.execCommand('copy');
+        
+        // Удаляем временный элемент
+        document.body.removeChild(tempElement);
+        selection.removeAllRanges();
+
+        if (successful) {
+          this.copyMessage = "Таблица скопирована в буфер обмена! Теперь вставьте её в Word.";
+          this.copyIsError = false;
+        } else {
+          throw new Error('Не удалось скопировать таблицу');
+        }
+      } catch (error) {
+        this.copyMessage = `Ошибка при копировании таблицы: ${error.message}`;
+        this.copyIsError = true;
+      }
     }
   }
 };
 </script>
 
 <style scoped>
+.tools {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  padding: 20px;
+}
+
+.tools-left {
+  grid-column: 1;
+}
+
+.tools-right {
+  grid-column: 2;
+  background: var(--container);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  background: var(--container);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
 
 .input-instructions {
   background-color: var(--inf);
@@ -235,20 +381,6 @@ export default {
   margin-top: 10px;
 }
 
-.tools {
-  padding: 20px;
-}
-
-.container {
-  max-width: 800px;
-  margin: 0 auto;
-  background: var(--container);
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-
 .input-section {
   margin-bottom: 20px;
 }
@@ -260,7 +392,7 @@ export default {
   color: var(--text2);
 }
 
-textarea {
+.minitextarea {
   width: 100%;
   padding: 10px;
   border: 1px solid #ddd;
@@ -308,6 +440,106 @@ pre {
   cursor: not-allowed;
 }
 
+.download-section {
+  margin-top: 20px;
+}
+
+.download-btn {
+  background: var(--button-3-bgc);
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s;
+}
+
+.download-btn:hover {
+  background: var(--button-4-bgc);
+}
+
+.copy-table-btn {
+  background: var(--button-2-bgc);
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 15px;
+  transition: background 0.3s;
+  width: 100%;
+}
+
+.copy-table-btn:hover {
+  background: var(--button-1-bgc);
+}
+
+.copy-message {
+  margin-top: 15px;
+  padding: 10px;
+  border-radius: 4px;
+}
+
+.copy-message:not(.error) {
+  background: var(--green2);
+  color: var(--green1);
+}
+
+.copy-message.error {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.table-preview h3 {
+  margin-top: 0;
+  color: var(--text2);
+  border-bottom: 2px solid var(--green1);
+  padding-bottom: 10px;
+}
+
+.table-container {
+  overflow-x: auto;
+  max-height: none;
+  transition: max-height 0.3s ease;
+}
+
+.detectors-table {
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.detectors-table th,
+.detectors-table td {
+  padding: 1px 5px;
+  text-align: center;
+  border: 1px solid var(--text-bcg-6);
+}
+
+.detectors-table th {
+  background-color: var(--text-bcg-9);
+  color: var(--text7);
+  font-weight: 600;
+}
+
+.detectors-table tr:nth-child(even) {
+  background-color: var(--text-bcg-2);
+}
+
+.detectors-table td:hover,
+.detectors-table th:hover {
+  background-color: var(--text-bcg-6);
+  font-weight: bold;
+}
+
+.empty-state {
+  text-align: center;
+  color: #666;
+  padding: 40px 20px;
+  font-style: italic;
+}
+
 .response-message {
   margin-top: 20px;
   padding: 10px;
@@ -315,8 +547,8 @@ pre {
 }
 
 .response-message:not(.error) {
-  background: #d4edda;
-  color: var(--green1)
+  background: var(--green2);
+  color: var(--green1);
 }
 
 .response-message.error {
