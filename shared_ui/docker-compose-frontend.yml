@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   shared-ui:
-    image: inteonmteca/shared_ui
+    image: inteonmteca/shared_ui:0.0.2
     ports:
       - "9000:80"
     container_name: shared-ui

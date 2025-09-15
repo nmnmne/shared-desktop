@@ -83,13 +83,13 @@
           </table>
         </div>
         <button class="copy-table-btn" @click="copyTableToClipboard">
-          📋 Скопировать таблицу (без заголовков)
+          📋 Скопировать таблицу
         </button>
         <div v-if="copyMessage" class="copy-message" :class="{ error: copyIsError }">
           {{ copyMessage }}
         </div>
       </div>
-      
+
       <div v-else class="empty-state">
         <p>Здесь будет отображаться предпросмотр таблицы после генерации</p>
       </div>

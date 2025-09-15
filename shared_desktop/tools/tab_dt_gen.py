@@ -236,7 +236,7 @@ class GenerateDetectorTable(APIView):
                 'ki_pd_16': '' if detector_type == 'ТВП' else ki_pd16_map.get(detector_name, '-'),
                 'direction_number': direction,
                 'offset': self._generate_offset(detector_type, direction, detector_name, all_detectors),
-                'request': '-',  # Всегда -
+                'request': '+' if detector_type == 'ТВП' else '-',
                 'gap': self._generate_gap(detector_type),
                 'unoccupied_alarm': self._generate_unoccupied_alarm(detector_type),
                 'occupied_alarm': self._generate_occupied_alarm(detector_type),
