@@ -1,10 +1,10 @@
 # shared_desktop_frontend
 
-docker build -t inteonmteca/shared_ui:0.0.1 .
-docker push inteonmteca/shared_ui:0.0.1
+docker build -t inteonmteca/shared_ui:0.0.2 .
+docker push inteonmteca/shared_ui:0.0.2
 
 docker-compose -f docker-compose-frontend.yml down
-docker pull inteonmteca/shared_ui:0.0.1
+docker pull inteonmteca/shared_ui:0.0.2
 docker-compose -f docker-compose-frontend.yml up -d
 
 docker image ls
