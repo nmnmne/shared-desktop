@@ -51,16 +51,21 @@ const sidebarNav = ref([
   },
   {
     id: 7,
-    title: "Работа с паспортом",
+    title: "Таблицы направлений",
     toolName: "passport",
   },
   {
     id: 8,
+    title: "Работа с паспортом",
+    toolName: "passport_auto",
+  },
+  {
+    id: 9,
     title: "Генератор таблицы детекторов",
     toolName: "tab_dt_gen",
   },
   {
-    id: 9,
+    id: 10,
     title: "Конфликты направлений",
     toolName: "calc_conflicts",
   },
