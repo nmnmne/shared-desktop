@@ -3,7 +3,7 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-
+from logging.handlers import TimedRotatingFileHandler
 
 load_dotenv()
 
@@ -14,8 +14,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 
 DEBUG = True
 
-
-CORS_ALLOW_ALL_ORIGINS = True  # Разрешить все origins
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
@@ -71,57 +70,80 @@ MIDDLEWARE = [
 ]
 MIDDLEWARE.insert(0, 'corsheaders.middleware.CorsMiddleware')
 
+LOG_DIR = BASE_DIR2 / 'logs'
+LOG_DIR.mkdir(exist_ok=True)
+
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'file': {
-            'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': 'sh_desk.log',
+    "version": 1,
+    "disable_existing_loggers": False,
+    
+    "handlers": {
+        "file": {
+            "level": "DEBUG",
+            "class": "logging.handlers.TimedRotatingFileHandler",
+            "filename": LOG_DIR / "app.log",
+            "when": "midnight",
+            "interval": 1,
+            "backupCount": 20,       # Хранить 20 файлов (20 дней)
+            "formatter": "verbose",
+            "encoding": "utf-8",
+        },
+        "console": {
+            "level": "DEBUG",
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
         },
     },
-    'root': {
-        'handlers': ['file'],
-        'level': 'DEBUG',
+    
+    "loggers": {
+        "tools": {
+            "level": "DEBUG",
+            "handlers": ["console", "file"],
+            "propagate": False,
+        },
+        "board": {
+            "level": "DEBUG",
+            "handlers": ["console", "file"],
+            "propagate": False,
+        },
+        "users": {
+            "level": "DEBUG",
+            "handlers": ["console", "file"],
+            "propagate": False,
+        },
+        "core": {
+            "level": "DEBUG",
+            "handlers": ["console", "file"],
+            "propagate": False,
+        },
+        
+        # Отключаем шумные библиотеки
+        "django": {
+            "level": "WARNING",
+            "handlers": ["console"],
+            "propagate": False,
+        },
+        "django.utils.autoreload": {
+            "level": "WARNING",
+            "propagate": False,
+        },
+        "urllib3": {
+            "level": "WARNING",
+            "propagate": False,
+        },
+        "rest_framework": {
+            "level": "WARNING",
+            "propagate": False,
+        },
+    },
+    
+    "formatters": {
+        "verbose": {
+            "format": "{name} {levelname} {asctime} {module} {lineno} {funcName} {message}",
+            "style": "{",
+        },
     },
 }
-
-# LOGGING = {
-#     "version": 1,
-#     "disable_existing_loggers": False,
-#     "handlers": {
-#         "file": {
-#             "level": "DEBUG",
-#             "class": "logging.FileHandler",
-#             "filename": os.path.join(BASE_DIR, "logs/django.log"),
-#             "formatter": "verbose",
-#         },
-#         "console": {
-#             "level": "DEBUG",
-#             "class": "logging.StreamHandler",
-#             "formatter": "verbose",
-#         },
-#     },
-#     "loggers": {
-#         "": {
-#             "level": "DEBUG",
-#             "handlers": ["console", 'file'],
-#             "propagate": True,
-#         },
-#     },
-#     "formatters": {
-#         "verbose": {
-#             # "format": "{name} {levelname} {asctime} {module} {process:d} {thread:d} {message}",
-#             "format": "{name} {levelname} {asctime} {module} {lineno} {funcName} {message} ",
-#             "style": "{",
-#         },
-#         "simple": {
-#             "format": "{levelname} {message}",
-#             "style": "{",
-#         },
-#     },
-# }
 
 ROOT_URLCONF = "shared_desktop.urls"
 
@@ -192,4 +214,3 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 MEDIA_ROOT2 = BASE_DIR2 / 'media'
-
