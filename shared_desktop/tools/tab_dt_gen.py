@@ -39,7 +39,12 @@ class GenerateDetectorTable(APIView):
             for row in table_data:
                 if row.get('offset') == '7':
                     row['offset'] = '6'
-            
+
+            # Заменяем все "3" на "2" в столбце offset
+            for row in table_data:
+                if row.get('offset') == '3':
+                    row['offset'] = '2'
+
             # Создаем DOCX документ
             document = self._create_document(table_data)
             
@@ -147,15 +152,19 @@ class GenerateDetectorTable(APIView):
     def _expand_detectors(self, detectors):
         expanded = []
         for detector in detectors:
-            if detector.startswith('TVP'):
+            # Проверяем наличие суффикса T
+            has_t_suffix = detector.endswith('T')
+            base_detector = detector[:-1] if has_t_suffix else detector
+            
+            if base_detector.startswith('TVP'):
                 prefix = 'ТВП '
-                parts = detector[3:].split('.')
-            elif detector.startswith('DO'):
+                parts = base_detector[3:].split('.')
+            elif base_detector.startswith('DO'):
                 prefix = 'DO'
-                parts = detector[2:].split('.')
-            elif detector.startswith('D'):
+                parts = base_detector[2:].split('.')
+            elif base_detector.startswith('D'):
                 prefix = 'D'
-                parts = detector[1:].split('.')
+                parts = base_detector[1:].split('.')
             else:
                 expanded.append(detector)
                 continue
@@ -168,6 +177,9 @@ class GenerateDetectorTable(APIView):
                 direction, number = int(parts[0]), int(parts[1])
                 for n in range(1, number + 1):
                     expanded_detector = f"{prefix}{direction}.{n}"
+                    # Добавляем суффикс T обратно, если он был
+                    if has_t_suffix:
+                        expanded_detector += 'T'
                     if expanded_detector not in expanded:
                         expanded.append(expanded_detector)
             except ValueError:
@@ -194,12 +206,29 @@ class GenerateDetectorTable(APIView):
             result[name] = f"{board_number}.{input_number}"
             
             # Получаем значение выноса для текущего детектора
-            offset = all_detectors_data[name]['offset']
+            current_offset = all_detectors_data[name]['offset']
+            
+            # Получаем значение выноса для следующего детектора (если существует)
+            next_offset = None
+            if i + 1 < len(filtered_detectors):
+                next_detector_name = filtered_detectors[i + 1]
+                next_offset = all_detectors_data[next_detector_name]['offset']
             
             # Проверяем условия для перехода на следующую плату
-            if input_number == 14 or input_number == 15 or input_number == 16:
-                # Для входов 14-16 - переход если вынос 6, - или 10
-                if offset in ["6", "-", "10"]:
+            if input_number == 14:
+                if next_offset in ["2"]:
+                    board_number += 1
+                    input_number = 1
+                else:
+                    input_number += 1
+            elif input_number == 15:
+                if current_offset in ["7", "10"] or (next_offset in ["2"]):
+                    board_number += 1
+                    input_number = 1
+                else:
+                    input_number += 1
+            elif input_number == 16:
+                if current_offset in ["7", "10"]:
                     board_number += 1
                     input_number = 1
                 else:
@@ -216,35 +245,76 @@ class GenerateDetectorTable(APIView):
 
     def _generate_detector_data(self, detector_name, position, all_detectors, ki_pd16_map):
         try:
-            if detector_name.startswith('ТВП'):
+            # Определяем тип детектора и наличие суффикса T
+            has_t_suffix = detector_name.endswith('T')
+            base_name = detector_name[:-1] if has_t_suffix else detector_name
+            
+            if base_name.startswith('ТВП'):
                 detector_type = 'ТВП'
-                direction = int(detector_name[4:].split('.')[0])
-            elif detector_name.startswith('DO'):
+                direction = int(base_name[4:].split('.')[0])
+            elif base_name.startswith('DO'):
                 detector_type = 'DO'
-                direction = int(detector_name[2:].split('.')[0])
-            elif detector_name.startswith('D'):
+                direction = int(base_name[2:].split('.')[0])
+            elif base_name.startswith('D'):
                 detector_type = 'D'
-                direction = int(detector_name[1:].split('.')[0])
+                direction = int(base_name[1:].split('.')[0])
             else:
                 detector_type = 'UNKNOWN'
                 direction = 0
 
-            data = {
-                'name': detector_name,
-                'io_board_input': self._generate_io_input(position, ki_pd16_map),
-                'ki_pd_2': '' if detector_type == 'ТВП' else '-',
-                'ki_pd_16': '' if detector_type == 'ТВП' else ki_pd16_map.get(detector_name, '-'),
-                'direction_number': direction,
-                'offset': self._generate_offset(detector_type, direction, detector_name, all_detectors),
-                'request': '+' if detector_type == 'ТВП' else '-',
-                'gap': self._generate_gap(detector_type),
-                'unoccupied_alarm': self._generate_unoccupied_alarm(detector_type),
-                'occupied_alarm': self._generate_occupied_alarm(detector_type),
-            }
+            # Для детекторов с суффиксом T
+            if has_t_suffix:
+                if detector_type == 'D':
+                    data = {
+                        'name': detector_name,
+                        'io_board_input': self._generate_io_input(position, ki_pd16_map),
+                        'ki_pd_2': '-',
+                        'ki_pd_16': ki_pd16_map.get(detector_name, '-'),
+                        'direction_number': direction,
+                        'offset': '-',  # прочерк для выноса
+                        'request': '-',
+                        'gap': '-',  # прочерк для разрыва
+                        'unoccupied_alarm': '420',  # 420 минут для аварии незанят
+                        'occupied_alarm': '3',  # 3 минуты для аварии занят
+                    }
+                elif detector_type == 'DO':
+                    data = {
+                        'name': detector_name,
+                        'io_board_input': self._generate_io_input(position, ki_pd16_map),
+                        'ki_pd_2': '-',
+                        'ki_pd_16': ki_pd16_map.get(detector_name, '-'),
+                        'direction_number': direction,
+                        'offset': '-',  # прочерк для выноса
+                        'request': '-',
+                        'gap': '-',  # прочерк для разрыва
+                        'unoccupied_alarm': '-',  # прочерк для аварии незанят
+                        'occupied_alarm': '-',  # прочерк для аварии занят
+                    }
+                else:
+                    # Для других типов с суффиксом T используем стандартную логику
+                    data = self._create_standard_data(detector_name, detector_type, direction, position, all_detectors, ki_pd16_map)
+            else:
+                # Стандартная логика для детекторов без суффикса T
+                data = self._create_standard_data(detector_name, detector_type, direction, position, all_detectors, ki_pd16_map)
 
             return data
         except Exception as e:
             return {'name': detector_name, 'error': f"Ошибка обработки детектора: {str(e)}"}
+
+    def _create_standard_data(self, detector_name, detector_type, direction, position, all_detectors, ki_pd16_map):
+        """Создает стандартные данные для детектора без суффикса T"""
+        return {
+            'name': detector_name,
+            'io_board_input': self._generate_io_input(position, ki_pd16_map),
+            'ki_pd_2': '' if detector_type == 'ТВП' else '-',
+            'ki_pd_16': '' if detector_type == 'ТВП' else ki_pd16_map.get(detector_name, '-'),
+            'direction_number': direction,
+            'offset': self._generate_offset(detector_type, direction, detector_name, all_detectors),
+            'request': '+' if detector_type == 'ТВП' else '-',
+            'gap': self._generate_gap(detector_type),
+            'unoccupied_alarm': self._generate_unoccupied_alarm(detector_type),
+            'occupied_alarm': self._generate_occupied_alarm(detector_type),
+        }
 
     def _generate_io_input(self, position, ki_pd16_map):
         # Определяем количество КИ ПД-16 (первая цифра в последней строке)
@@ -284,7 +354,7 @@ class GenerateDetectorTable(APIView):
             
             # Логика для деления по 2, если количество детекторов делится на 2 и не более 4
             if count % 2 == 0 and count <= 4:
-                pattern = ['2', '7']  # 7 будет заменено на 6 позже
+                pattern = ['3', '7']  # 7 будет заменено на 6 позже, 3 на 2
             else:
                 pattern = ['2', '6', '10']
 
