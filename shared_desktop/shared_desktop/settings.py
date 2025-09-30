@@ -84,7 +84,7 @@ LOGGING = {
             "filename": LOG_DIR / "app.log",
             "when": "midnight",
             "interval": 1,
-            "backupCount": 20,       # Хранить 20 файлов (20 дней)
+            "backupCount": 20,
             "formatter": "verbose",
             "encoding": "utf-8",
         },
@@ -96,31 +96,39 @@ LOGGING = {
     },
     
     "loggers": {
-        "tools": {
+        # Оставляем только один логгер
+        "tools.api_dir": {
             "level": "DEBUG",
             "handlers": ["console", "file"],
+            "propagate": False,
+        },
+        
+        # Отключаем все остальные логгеры
+        "tools": {
+            "level": "WARNING",  # Понижаем уровень для остальных tools
+            "handlers": [],
             "propagate": False,
         },
         "board": {
-            "level": "DEBUG",
-            "handlers": ["console", "file"],
+            "level": "WARNING",
+            "handlers": [],
             "propagate": False,
         },
         "users": {
-            "level": "DEBUG",
-            "handlers": ["console", "file"],
+            "level": "WARNING",
+            "handlers": [],
             "propagate": False,
         },
         "core": {
-            "level": "DEBUG",
-            "handlers": ["console", "file"],
+            "level": "WARNING",
+            "handlers": [],
             "propagate": False,
         },
         
         # Отключаем шумные библиотеки
         "django": {
             "level": "WARNING",
-            "handlers": ["console"],
+            "handlers": [],
             "propagate": False,
         },
         "django.utils.autoreload": {
