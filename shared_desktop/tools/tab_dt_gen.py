@@ -222,7 +222,7 @@ class GenerateDetectorTable(APIView):
                 else:
                     input_number += 1
             elif input_number == 15:
-                if current_offset in ["7", "10"] or (next_offset in ["2"]):
+                if current_offset in ["7", "10"] or (next_offset in ["2", "3"]):
                     board_number += 1
                     input_number = 1
                 else:
