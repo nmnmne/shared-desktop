@@ -16,6 +16,7 @@
         <CalcConflicts v-if="toolName === 'calc_conflicts'" />
         <Passport v-if="toolName === 'passport'" />
         <PassportAuto v-if="toolName === 'passport_auto'" />
+        <TabComGen v-if="toolName === 'tab_com_gen'" />
       </div>
 
     </div>
@@ -36,6 +37,7 @@ import TabDtGen from "@/tools/TabDtGen.vue"
 import CalcConflicts from "@/tools/CalcConflicts.vue";
 import Passport from "@/tools/Passport.vue";
 import PassportAuto from "@/tools/PassportAuto.vue";
+import TabComGen from "@/tools/TabComGen.vue";
 
 const route = useRoute();
 const router = useRouter();
