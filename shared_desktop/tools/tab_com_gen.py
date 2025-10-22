@@ -377,7 +377,7 @@ class GenerateSwitchTable(APIView):
             if "Таблица коммутации контроллера" in current_value:
                 # Сохраняем тип контроллера и добавляем адрес
                 controller_type = current_value.replace("Таблица коммутации контроллера", "").strip()
-                ws['A2'].value = f"Таблица коммутации контроллера {controller_type} {address}"
+                ws['A2'].value = f'Таблица коммутации контроллера "{controller_type}", {address}'
     
     def fill_table_data(self, ws, table_data, controller_type):
         """Заполнение данных таблицы (№ напр., Тип напр., Разреш. фазы, № светофора)"""
