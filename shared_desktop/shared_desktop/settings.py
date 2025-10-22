@@ -96,9 +96,9 @@ LOGGING = {
     },
     
     "loggers": {
-        # Оставляем только один логгер
+        # Тоже отключил этот логгер
         "tools.api_dir": {
-            "level": "DEBUG",
+            "level": "WARNING",
             "handlers": ["console", "file"],
             "propagate": False,
         },

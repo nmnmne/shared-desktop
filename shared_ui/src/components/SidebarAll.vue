@@ -69,6 +69,11 @@ const sidebarNav = ref([
     title: "Конфликты направлений",
     toolName: "calc_conflicts",
   },
+  {
+    id: 11,
+    title: "Таблицы коммутаций",
+    toolName: "tab_com_gen",
+  },
 ]);
 
 const activeTool = ref(null);

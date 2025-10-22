@@ -7,12 +7,13 @@ from .toolkit import views
 from . import (
     api_dir, calculate_cycle, dt_potok, excel_phase_count,
     excel_sg_count_model, phase_control, restart_web_admin,
-    views, openpyxl, crcpeek, swarco_log,
+    views, open_py_xl, crcpeek, swarco_log,
     get_firmware, swarco_ssh, dt_potok2
 )
-from .openpyxl import OpenpyxlAPIView
+from .open_py_xl import OpenpyxlAPIView
 from .swarco_log import SwarcoLogView
 from .tab_dt_gen import GenerateDetectorTable
+from .tab_com_gen import GenerateSwitchTable, ReadPdfPassport
 from .toolkit.views import (
     ControllerManagementAPI,
     DownloadConfig,
@@ -73,7 +74,7 @@ urlpatterns = [
     path('get_phase/', phase_control.get_phase, name='get_phase'),
     path('set_phase/', phase_control.set_phase, name='set_phase'),
 
-    path('openpyxl/', openpyxl.openpyxl, name='openpyxl'),
+    path('openpyxl/', open_py_xl.openpyxl, name='openpyxl'),
     path('api/openpyxl/', OpenpyxlAPIView.as_view(), name='openpyxl-api'),
     path('api/parameter-sets/<str:name>/', OpenpyxlAPIView.as_view(), name='parameter-sets-detail'),
     path('crcpeek/', crcpeek.crcpeek, name='crcpeek'),
@@ -83,6 +84,9 @@ urlpatterns = [
     path('get_firmware/', get_firmware.get_firmware, name='get_firmware'),
     path('get_firmware_api/', get_firmware.get_firmware_api, name='get_firmware_api'),
     path('generate-detector-table/', GenerateDetectorTable.as_view(), name='generate-detector-table'),
+
+    path('generate-switch-table/', GenerateSwitchTable.as_view(), name='generate-switch-table'),
+    path('read-pdf-passport/', ReadPdfPassport.as_view(), name='read-pdf-passport'),
 
     path("manage_controllers/", ManageControllers.as_view(), name='manage_controllers'),
     path("download_config/", DownloadConfig.as_view(), name='download_config'),
