@@ -635,23 +635,27 @@ class GenerateSwitchTable(APIView):
         for merge in merges:
             ws.merge_cells(merge)
 
+        # Вычисляем номера тиристоров для этой клеммы
+        # Каждая клемма имеет 4 тиристора, нумерация сквозная
+        start_thyristor = (klemma_num - 1) * 4 + 1
+        
         klemma_data = [
             (start_row, 'A', klemma_num),
             (start_row, 'B', 'О'),
             (start_row, 'C', ' О'),
-            (start_row, 'D', '1'),
+            (start_row, 'D', start_thyristor),  # 1, 5, 9, 13 и т.д.
             (start_row, 'I', 'красный'),
             (start_row+1, 'B', 'О'),
             (start_row+1, 'C', ' О'),
-            (start_row+1, 'D', f'=D{start_row}+1'),
+            (start_row+1, 'D', start_thyristor + 1),  # 2, 6, 10, 14 и т.д.
             (start_row+1, 'I', 'желтый'),
             (start_row+2, 'B', 'О'),
             (start_row+2, 'C', ' О'),
-            (start_row+2, 'D', f'=D{start_row+1}+1'),
+            (start_row+2, 'D', start_thyristor + 2),  # 3, 7, 11, 15 и т.д.
             (start_row+2, 'I', 'зеленый'),
             (start_row+3, 'B', 'О'),
             (start_row+3, 'C', ' О'),
-            (start_row+3, 'D', '4'),
+            (start_row+3, 'D', start_thyristor + 3),  # 4, 8, 12, 16 и т.д.
             (start_row+3, 'I', 'стрелка'),
         ]
 
@@ -664,11 +668,11 @@ class GenerateSwitchTable(APIView):
         
         self.set_merged_cell_borders(ws, f'A{start_row}:J{start_row+3}', border_middle_thin)
         self.set_merged_cell_borders(ws, f'A{start_row}:J{start_row}', 
-                               Border(left=Side(style='medium'), right=Side(style='medium'), 
-                                     top=Side(style='medium'), bottom=Side(style='thin')))
+                            Border(left=Side(style='medium'), right=Side(style='medium'), 
+                                    top=Side(style='medium'), bottom=Side(style='thin')))
         self.set_merged_cell_borders(ws, f'A{start_row+3}:J{start_row+3}', 
-                               Border(left=Side(style='medium'), right=Side(style='medium'), 
-                                     top=Side(style='thin'), bottom=Side(style='medium')))
+                            Border(left=Side(style='medium'), right=Side(style='medium'), 
+                                    top=Side(style='thin'), bottom=Side(style='medium')))
 
     def create_klemmas_potok_d(self, ws):
         """Создание клемм для Поток-Д (3 строки на клемму, разделитель после каждой)"""
@@ -697,19 +701,23 @@ class GenerateSwitchTable(APIView):
         for merge in merges:
             ws.merge_cells(merge)
 
+        # Вычисляем номера тиристоров для этой клеммы
+        # Каждая клемма имеет 3 тиристора, нумерация сквозная
+        start_thyristor = (klemma_num - 1) * 3 + 1
+
         klemma_data = [
             (start_row, 'A', klemma_num),
             (start_row, 'B', 'О'),
             (start_row, 'C', ' О'),
-            (start_row, 'D', '1'),
+            (start_row, 'D', start_thyristor),  # 1, 4, 7, 10 и т.д.
             (start_row, 'I', 'красный'),
             (start_row+1, 'B', 'О'),
             (start_row+1, 'C', ' О'),
-            (start_row+1, 'D', f'=D{start_row}+1'),
+            (start_row+1, 'D', start_thyristor + 1),  # 2, 5, 8, 11 и т.д.
             (start_row+1, 'I', 'желтый'),
             (start_row+2, 'B', 'О'),
             (start_row+2, 'C', ' О'),
-            (start_row+2, 'D', f'=D{start_row+1}+1'),
+            (start_row+2, 'D', start_thyristor + 2),  # 3, 6, 9, 12 и т.д.
             (start_row+2, 'I', 'зеленый'),
         ]
 
@@ -722,11 +730,11 @@ class GenerateSwitchTable(APIView):
         
         self.set_merged_cell_borders(ws, f'A{start_row}:J{start_row+2}', border_middle_thin)
         self.set_merged_cell_borders(ws, f'A{start_row}:J{start_row}', 
-                               Border(left=Side(style='medium'), right=Side(style='medium'), 
-                                     top=Side(style='medium'), bottom=Side(style='thin')))
+                            Border(left=Side(style='medium'), right=Side(style='medium'), 
+                                    top=Side(style='medium'), bottom=Side(style='thin')))
         self.set_merged_cell_borders(ws, f'A{start_row+2}:J{start_row+2}', 
-                               Border(left=Side(style='medium'), right=Side(style='medium'), 
-                                     top=Side(style='thin'), bottom=Side(style='medium')))
+                            Border(left=Side(style='medium'), right=Side(style='medium'), 
+                                    top=Side(style='thin'), bottom=Side(style='medium')))
 
     def apply_klemma_styles(self, ws, klemma_data, start_row, bold_font, center, grey_fill, rows_per_klemma):
         """Применение стилей к ячейкам клеммы"""
