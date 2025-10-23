@@ -4,7 +4,7 @@
       <h2 class="title">Генератор таблицы коммутаций</h2>
 
       <div class="mb10">
-        <label>Выберите тип контроллера и количество влемм:</label>
+        <label>Выберите тип контроллера и количество клемм:</label>
       </div>
 
       <div class="form-inline mb10">
@@ -12,8 +12,8 @@
             id="controller-type"
             v-model="controllerType" 
             @change="onControllerTypeChange"
-            class="form-control"
-            style="width: 24ch;"
+            class="text"
+            style="width: 11ch;"
           >
             <option value="Поток">Поток</option>
             <option value="Поток-Д">Поток-Д</option>
@@ -23,8 +23,8 @@
             id="num-klemm"
             v-model="numKlemm" 
             :disabled="controllerType === 'Поток-Д'"
-            class="form-control"
-            style="width: 10ch;"
+            class="text"
+            style="width: 8ch;"
           >
             <option v-for="n in evenNumbers" :key="n" :value="n">{{ n }}</option>
           </select>
@@ -36,7 +36,7 @@
       <!-- Форма для генерации таблицы -->
       <div class="generation-form">
         <div class="mb10">
-          <label>Загрузите паспорт для автоматического заполнения:</label>
+          <label>Загрузите паспорт в формате .pdf для автоматического заполнения:</label>
         </div>
 
         <!-- Загрузка паспорта -->
@@ -321,32 +321,19 @@ export default {
   background-color: #f9f9f9;
 }
 
-.form-control:disabled {
-  background-color: #e9ecef;
-  opacity: 0.7;
-}
-
-.form-control[readonly] {
-  background-color: #e9ecef;
-  cursor: not-allowed;
+.text:disabled {
+  opacity: 0.4;
 }
 
 .form-text {
   color: #6c757d;
   font-size: 0.875em;
-  margin-top: 5px;
-}
-
-.custom-file-input {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background-color: #f9f9f9;
+  margin: 8px;
+  opacity: 0.5;
 }
 
 .btn-primary {
-  background-color: #007bff;
+  background-color: var(--button-3-bgc);
   color: white;
   padding: 10px 20px;
   border: none;
@@ -357,12 +344,12 @@ export default {
 }
 
 .btn-primary:disabled {
-  background-color: #6c757d;
+  background-color: var(--button-5-bgc);
   cursor: not-allowed;
 }
 
 .file-info {
-  background-color: #f8f9fa;
+  background-color: var(--info-2);
   padding: 10px;
   border-radius: 4px;
   margin-bottom: 20px;
@@ -376,13 +363,13 @@ export default {
 }
 
 .status-message.loading {
-  background-color: #fff3cd;
+  background-color: var(--info-2);
   border-left: 4px solid #ffc107;
   color: #856404;
 }
 
 .status-message.error {
-  background-color: #f8d7da;
+  background-color: var(--info-2);
   border-left: 4px solid #dc3545;
   color: #721c24;
 }
@@ -390,7 +377,7 @@ export default {
 .preview-section {
   margin-top: 20px;
   padding: 15px;
-  background-color: #e7f3ff;
+  background-color: var(--info-2);
   border-radius: 4px;
   border-left: 4px solid #17a2b8;
 }
@@ -405,8 +392,8 @@ export default {
 }
 
 .json-display {
-  background-color: #f8f9fa;
-  border: 1px solid #e9ecef;
+  background-color: var(--info-2);
+  border: 1px solid var(--border-2);
   border-radius: 4px;
   padding: 15px;
   max-height: 800px;

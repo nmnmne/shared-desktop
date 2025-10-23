@@ -28,10 +28,11 @@ const route = useRoute();
 // Массив меню
 const menu = ref([
   { id: 1, title: "Главная", path: "/" },
-  { id: 2, title: "Поток", path: "/tools_potok" },
-  { id: 3, title: "Swarco", path: "/tools_swarco" },
-  { id: 4, title: "Peek", path: "/tools_peek" },
-  { id: 5, title: "Общее", path: "/tools_all" },
+  { id: 2, title: "Паспорт", path: "/tools_passport" },
+  { id: 3, title: "Поток", path: "/tools_potok" },
+  { id: 4, title: "Swarco", path: "/tools_swarco" },
+  { id: 5, title: "Peek", path: "/tools_peek" },
+  { id: 6, title: "Общее", path: "/tools_all" },
 ]);
 
 // Функция для проверки активного пути
