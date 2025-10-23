@@ -12,19 +12,6 @@ from django.http import HttpResponse
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
 
-import re
-import pdfplumber
-from rest_framework.views import APIView
-from rest_framework.parsers import MultiPartParser, FormParser
-from rest_framework.response import Response
-from rest_framework import status
-
-import re
-import pdfplumber
-from rest_framework.views import APIView
-from rest_framework.parsers import MultiPartParser, FormParser
-from rest_framework.response import Response
-from rest_framework import status
 
 class ReadPdfPassport(APIView):
     parser_classes = (MultiPartParser, FormParser)
@@ -69,84 +56,44 @@ class ReadPdfPassport(APIView):
                 os.remove('temp.pdf')
     
     def extract_passport_info(self, pdf_path):
-        """Извлечение номера паспорта и адреса с первой страницы"""
         try:
             with pdfplumber.open(pdf_path) as pdf:
-                first_page = pdf.pages[0]
-                page_text = first_page.extract_text()
+                text = pdf.pages[0].extract_text()
+                if not text:
+                    return {"number": "", "address": ""}
+
+                # Ищем номер паспорта
+                number_match = re.search(r'Паспорт[^№]*№\s*(\d+)', text)
+                passport_number = number_match.group(1) if number_match else ""
                 
-                if not page_text:
-                    return {"number": "не найден", "address": "не найден"}
+                # Ищем адрес после номера
+                address = ""
+                if number_match:
+                    # Берем текст после номера до конца строки или до ключевых слов
+                    rest_of_text = text[number_match.end():]
+                    address_match = re.search(r'[-–—]?\s*([^\n]+?)(?:\n|$|Паспорт|светофорного)', rest_of_text)
+                    if address_match:
+                        address = address_match.group(1).strip()
                 
-                lines = page_text.split('\n')
-                
-                passport_number = None
-                address = None
-                
-                # Ищем строку с номером паспорта
-                for i, line in enumerate(lines):
-                    line = line.strip()
-                    
-                    # Ищем строки с упоминанием паспорта и номером
-                    if 'Паспорт светофорного объекта' in line or 'Проектный Паспорт светофорного объекта' in line:
-                        # Извлекаем номер из строки
-                        number_match = re.search(r'№\s*(\d+)', line)
-                        if number_match:
-                            passport_number = number_match.group(1)
-                        
-                        # Следующая строка обычно содержит адрес
-                        if i + 1 < len(lines):
-                            next_line = lines[i + 1].strip()
-                            # Проверяем, что следующая строка не пустая и не содержит ключевых слов паспорта
-                            if (next_line and 
-                                'Паспорт' not in next_line and 
-                                'светофорного' not in next_line and
-                                not re.match(r'^№?\s*\d+$', next_line)):
-                                address = next_line
-                                # Убираем возможные лишние символы
-                                address = re.sub(r'^[-–—\s]+|[-–—\s]+$', '', address)
-                    
-                    # Если нашли и номер и адрес - выходим
-                    if passport_number and address:
-                        break
-                
-                # Если адрес не найден в следующей строке, ищем в той же строке после номера
-                if passport_number and not address:
-                    for line in lines:
-                        if 'Паспорт светофорного объекта' in line:
-                            # Пытаемся извлечь адрес из той же строки после номера
-                            address_match = re.search(r'№\s*\d+\s*[-–—]?\s*([^\n]+)', line)
-                            if address_match:
-                                potential_address = address_match.group(1).strip()
-                                # Проверяем, что это не продолжение заголовка
-                                if ('Паспорт' not in potential_address and 
-                                    'светофорного' not in potential_address):
-                                    address = potential_address
-                                    # Убираем возможные лишние символы в начале/конце
-                                    address = re.sub(r'^[-–—\s]+|[-–—\s]+$', '', address)
-                
-                return {
-                    "number": passport_number or "не найден",
-                    "address": address or "не найден"
-                }
+                return {"number": passport_number, "address": address}
                 
         except Exception as e:
-            print(f"Ошибка извлечения информации о паспорте: {e}")
-            return {"number": "ошибка", "address": "ошибка"}
-    
+            print(f"Ошибка извлечения: {e}")
+            return {"number": "", "address": ""}
+
     def extract_directions_table(self, pdf_path):
         """Извлечение таблицы направлений из PDF по ключевым заголовкам"""
         table_data = []
-        
+
         with pdfplumber.open(pdf_path) as pdf:
             full_text = ""
-            
+
             # Собираем весь текст из PDF
             for page in pdf.pages:
                 page_text = page.extract_text()
                 if page_text:
                     full_text += page_text + "\n"
-            
+
             # Ключевые заголовки для поиска таблицы
             key_headers = [
                 '№ нап.',
@@ -156,10 +103,10 @@ class ReadPdfPassport(APIView):
                 '"Запрет"',
                 '"Разрешение"'
             ]
-            
+
             lines = full_text.split('\n')
             table_start_index = -1
-            
+
             # Ищем начало таблицы по ключевым заголовкам
             for i, line in enumerate(lines):
                 # Проверяем, содержит ли строка хотя бы 2 ключевых заголовка
@@ -168,18 +115,18 @@ class ReadPdfPassport(APIView):
                     table_start_index = i
                     print(f"Найдена таблица на строке {i}: {line}")
                     break
-            
+
             if table_start_index == -1:
                 print("Таблица не найдена по ключевым заголовкам")
                 return []
-            
+
             # Пропускаем строку с заголовками и ищем данные
             data_lines = []
             for line in lines[table_start_index + 1:]:
                 line = line.strip()
                 if not line:
                     continue
-                    
+
                 # Ищем строки, которые начинаются с цифры (номера направлений)
                 if re.match(r'^\s*\d+\s+', line):
                     data_lines.append(line)
@@ -187,15 +134,15 @@ class ReadPdfPassport(APIView):
                 # Если нашли новую секцию - заканчиваем
                 elif line.startswith('___') or line.startswith('**') or 'страница' in line.lower() or 'Информационные секции' in line:
                     break
-            
+
             # Парсим найденные строки
             for line in data_lines:
                 direction_data = self.parse_direction_line(line)
                 if direction_data:
                     table_data.append(direction_data)
-        
+
         return table_data
-    
+
     def parse_direction_line(self, line):
         """Парсинг строки с данными направления с учетом структуры колонок"""
         try:
