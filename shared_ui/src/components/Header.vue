@@ -28,7 +28,7 @@ const route = useRoute();
 // Массив меню
 const menu = ref([
   { id: 1, title: "Главная", path: "/" },
-  { id: 2, title: "Паспорт", path: "/tools_passport" },
+  { id: 2, title: "Паспорт", path: "/tools_passport/passport_1" },
   { id: 3, title: "Поток", path: "/tools_potok" },
   { id: 4, title: "Swarco", path: "/tools_swarco" },
   { id: 5, title: "Peek", path: "/tools_peek" },

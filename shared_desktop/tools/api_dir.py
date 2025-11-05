@@ -99,7 +99,7 @@ def get_controller_info(controller_id):
         }
     
     url = f"{API_URL}/controllers/ext:{controller_id}"
-    headers = {"accept": "application/json", "x-rmsapi-token": token}
+    headers = {"accept": "application/json", "Authorization": f"Bearer {token}"}
     response = requests.get(url, headers=headers)
     
     if response.status_code == 200:
@@ -132,7 +132,7 @@ def get_controller_status(controller_id):
         }
     
     url = f"{API_URL}/controllers/ext:{controller_id}/status"
-    headers = {"accept": "application/json", "x-rmsapi-token": token}
+    headers = {"accept": "application/json", "Authorization": f"Bearer {token}"}
     response = requests.get(url, headers=headers)
     
     # Логирование только если статус не 200

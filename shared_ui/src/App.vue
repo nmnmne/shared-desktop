@@ -17,11 +17,12 @@ import SidebarAll from "@/components/SidebarAll.vue";
 import SidebarPotok from "@/components/SidebarPotok.vue";
 import SidebarSwarco from "@/components/SidebarSwarco.vue";
 import SidebarPeek from "@/components/SidebarPeek.vue";
+import SidebarPassport from "@/components/SidebarPassport.vue";
 import Footer from "@/components/Footer.vue";
 
 export default {
   name: "App",
-  components: {Footer, Header, SidebarAll, SidebarPotok, SidebarSwarco, SidebarPeek},
+  components: {Footer, Header, SidebarAll, SidebarPotok, SidebarSwarco, SidebarPeek, SidebarPassport},
 };
 </script>
 
