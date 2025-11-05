@@ -60,41 +60,50 @@ def is_valid_ip(ip):
 
 # Функция для отправки запроса к API и получения версии прошивки
 def get_firmware(ip, protocol):
-    url = "http://192.168.45.90/get_firmware_api/"
-    start_time = time.time()  # Засекаем время начала
-    max_wait_time = 12  # Максимальное время ожидания в секундах
+    url = "http://192.168.45.116/get_firmware_api/"
+    start_time = time.time()
+    max_wait_time = 12
 
     data = {
         "ip": ip,
         "protocol": protocol
     }
 
+    print(f"Отправляем запрос для IP: {ip}, Протокол: '{protocol}'")  # ДЛЯ ОТЛАДКИ
+
     try:
+        attempt = 0
         while True:
-            # Проверяем, не превышено ли максимальное время ожидания
+            attempt += 1
             if time.time() - start_time > max_wait_time:
-                print(f"Превышено максимальное время ожидания ({max_wait_time} сек) для {ip}")
+                print(f"Превышено время ожидания для {ip}")
                 return "Таймаут ожидания"
             
             response = requests.post(url, json=data, timeout=20)
+            print(f"Попытка {attempt}: Status Code: {response.status_code}")  # ДЛЯ ОТЛАДКИ
+            
             if response.status_code == 200:
                 response_data = response.json()
+                print(f"Ответ сервера: {response_data}")  # ДЛЯ ОТЛАДКИ
+                
                 version = response_data.get("version") or response_data.get("errorMessage")
 
-                # Если версия "loading", ждем и повторяем запрос
                 if version == "loading":
                     print(f"Версия для {ip} все еще в процессе загрузки, ждем...")
-                    time.sleep(1)  # Задержка 1 секунда
-                    continue  # Продолжаем цикл
+                    time.sleep(1)
+                    continue
                 else:
+                    print(f"Получена версия: {version}")  # ДЛЯ ОТЛАДКИ
                     return version
             else:
+                print(f"Ошибка HTTP: {response.status_code}")
                 return f"Ошибка: {response.status_code}"
                 
     except requests.Timeout:
-        print(f"Тайм-аут для {ip}, версия не получена.")
+        print(f"Тайм-аут для {ip}")
         return "Тайм-аут запроса"
     except Exception as e:
+        print(f"Исключение: {str(e)}")
         return f"Ошибка при запросе: {str(e)}"
 
 # Функция для проверки пинга

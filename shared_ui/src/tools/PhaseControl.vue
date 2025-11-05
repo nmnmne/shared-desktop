@@ -45,7 +45,7 @@
       </div>
     </div>
 
-    <div class="margin-top">
+    <div class="mt30">
       <span @click="toggleVisibility" style="cursor: pointer; user-select: none; margin: 7px;">
         {{ isVisible ? 'Скрыть ^' : 'Показать >' }}
       </span>
